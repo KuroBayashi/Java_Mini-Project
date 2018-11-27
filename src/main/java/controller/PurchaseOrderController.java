@@ -1,21 +1,30 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package controller;
 
 import java.io.IOException;
-import javafx.util.Pair;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import repository.DataSourceFactory;
+import repository.PurchaseOrderRepository;
 
+/**
+ *
+ * @author pedago
+ */
+@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrderController"})
+public class PurchaseOrderController extends HttpServlet {
 
-@WebServlet(name = "AdminController", urlPatterns = {"/admin"})
-public class AdminController extends HttpServlet {
-    
-    public final static String username = "root";
-    public final static String password = "toor";
-    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -27,17 +36,34 @@ public class AdminController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        response.setContentType("text/html;charset=UTF-8");
+        
+        // Créér le DAO avec sa source de données
+        try {
+            PurchaseOrderRepository purchaseOrderRepository = new PurchaseOrderRepository(DataSourceFactory.getDataSource());
 
-        request.setCharacterEncoding("UTF-8");
-        
-        HttpSession session = request.getSession();
-        
-        if (null == session.getAttribute("isAdmin")) {
-            session.setAttribute("error", new Pair<>(403, "Access denied."));
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            Properties resultat = new Properties();
+            try {
+                resultat.put("records", purchaseOrderRepository.findAllGroupByProductCode());
+            } catch (SQLException ex) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resultat.put("records", Collections.EMPTY_LIST);
+                resultat.put("message", ex.getMessage());
+            }
+
+            try (PrintWriter out = response.getWriter()) {
+                // On spécifie que la servlet va générer du JSON
+                response.setContentType("application/json;charset=UTF-8");
+                // Générer du JSON
+                // Gson gson = new Gson();
+                // setPrettyPrinting pour que le JSON généré soit plus lisible
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                out.println(gson.toJson(resultat));
+            }
         }
-        else {
-            request.getRequestDispatcher("template/admin/data.jsp").forward(request, response);
+        catch () {
+            
         }
     }
 

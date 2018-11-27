@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import javafx.util.Pair;
 import javax.sql.DataSource;
 
 
@@ -34,7 +35,7 @@ public class PurchaseOrderRepository {
         
         String sql = "SELECT quantity, shipping_cost, sales_date, shipping_date, freight_company,"
                 + "    product.product_id, product.purchase_cost, product.quantity_on_hand, product.markup, product.available, product.description AS product_description,"
-                + "    manufacturer_id, manufacturer.name, manufacturer.addressline1, manufacturer.addressline2, manufacturer.city, manufacturer.state, manufacturer.phone, manufacturer.fax, manufacturer.email, manufacturer.rep,"
+                + "    manufacturer.manufacturer_id, manufacturer.name, manufacturer.addressline1, manufacturer.addressline2, manufacturer.city, manufacturer.state, manufacturer.phone, manufacturer.fax, manufacturer.email, manufacturer.rep,"
                 + "    micro_market.zip_code, micro_market.radius, micro_market.area_length, micro_market.area_width,"
                 + "    product_code.prod_code, product_code.description AS product_code_description,"
                 + "    discount_code.discount_code, discount_code.rate"
@@ -61,42 +62,42 @@ public class PurchaseOrderRepository {
                         num,
                         customer,
                         new Product(
-                            rs.getInt("product.product_id"),
+                            rs.getInt("product_id"),
                             new Manufacturer(
-                                rs.getInt("manufacturer.manufacturer_id"),
-                                rs.getString("manufacturer.name"),
+                                rs.getInt("manufacturer_id"),
+                                rs.getString("name"),
                                 new Location(
-                                    rs.getString("manufacturer.addressline1"),
-                                    rs.getString("manufacturer.addressline2"),
+                                    rs.getString("addressline1"),
+                                    rs.getString("addressline2"),
                                     new MicroMarket(
-                                        rs.getString("micro_market.zip_code"),
-                                        rs.getFloat("micro_market.radius"),
-                                        rs.getFloat("micro_market.area_length"),
-                                        rs.getFloat("micro_market.area_width")
+                                        rs.getString("zip_code"),
+                                        rs.getFloat("radius"),
+                                        rs.getFloat("area_length"),
+                                        rs.getFloat("area_width")
                                     ),
-                                    rs.getString("manufacturer.city"),
-                                    rs.getString("manufacturer.state")
+                                    rs.getString("city"),
+                                    rs.getString("state")
                                 ),
                                 new Contact(
-                                    rs.getString("manufacturer.email"),
-                                    rs.getString("manufacturer.phone"),
-                                    rs.getString("manufacturer.fax")
+                                    rs.getString("email"),
+                                    rs.getString("phone"),
+                                    rs.getString("fax")
                                 ),
-                                rs.getString("manufacturer.rep")
+                                rs.getString("rep")
                             ),
                             new ProductCode(
-                                rs.getString("product_code.prod_code"),
+                                rs.getString("prod_code"),
                                 new DiscountCode(
-                                    rs.getString("discount_code.discount_code").charAt(0),
-                                    rs.getFloat("discount_code.rate")
+                                    rs.getString("discount_code").charAt(0),
+                                    rs.getFloat("rate")
                                 ),
-                                rs.getString("product_code.description")
+                                rs.getString("product_code_description")
                             ),
                             rs.getFloat("purchase_cost"),
                             rs.getInt("quantity_on_hand"),
                             rs.getFloat("markup"),
                             rs.getBoolean("available"),
-                            rs.getString("description")
+                            rs.getString("product_description")
                         ),
                         rs.getInt("quantity"),
                         rs.getFloat("shipping_cost"),
@@ -113,7 +114,6 @@ public class PurchaseOrderRepository {
             throw new RepositoryException("MicroMarketRepository:findByCustomerAndNum - " + e.getMessage());
         }
     }
-    
     
     public List<PurchaseOrder> findAllByCustomer(Customer customer) throws RepositoryException {
         
@@ -223,7 +223,7 @@ public class PurchaseOrderRepository {
     
     public void delete(Customer customer, Integer num) throws RepositoryException {
         
-        String sql = "DELETE purchase_order WHERE order_num = ? AND customer_id = ?";
+        String sql = "DELETE FROM purchase_order WHERE order_num = ? AND customer_id = ?";
         
         try (
             Connection connection = this.dataSource.getConnection();
@@ -237,6 +237,47 @@ public class PurchaseOrderRepository {
                     
         } catch (SQLException e) {
             throw new RepositoryException("MicroMarketRepository:delete - " + e.getMessage());
+        }
+    }
+
+    public List<Pair<Float, ProductCode>> findAllGroupByProductCode() throws RepositoryException {
+        List<Pair<Float, ProductCode>> productCodeList = new LinkedList<>();
+        
+        String sql = "SELECT SUM(shipping_cost + quantity * purchase_cost) AS total, prod_code, product_code.discount_code, description, rate"
+                + " FROM purchase_order"
+                + " LEFT JOIN product ON purchase_order.product_id = product.product_id"
+                + " LEFT JOIN product_code ON product.product_code = product_code.prod_code"
+                + " LEFT JOIN discount_code ON product_code.discount_code = discount_code.discount_code"
+                + " GROUP BY prod_code"
+                + " WHERE shipping_date BETWEEN ? AND ?";
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            try (
+                ResultSet rs = stmt.executeQuery();
+            ) {
+                while (rs.next()) {
+                    productCodeList.add(
+                        new Pair<>(
+                            rs.getFloat("total"),
+                            new ProductCode(
+                                rs.getString("prod_code"),
+                                new DiscountCode(
+                                    rs.getString("discount_code").charAt(0),
+                                    rs.getFloat("rate")
+                                ),
+                                rs.getString("description")
+                            )
+                        )
+                    );
+                }
+                
+                return productCodeList;
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("MicroMarketRepository:findByCustomerAndNum - " + e.getMessage());
         }
     }
 }

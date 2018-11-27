@@ -15,6 +15,6 @@
         
         <h2>Erreur</h2>
         
-        <p>${error}</p>
+        ${error}
     </body>
 </html>

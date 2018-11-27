@@ -13,7 +13,6 @@
         <c:forEach var="purchaseOrder" items="${purchaseOrders}">
             <tr>
                 <td class="c-table__td">
-                    pokzepof kpozkef pokzep okpozekf pozke f
                     ${purchaseOrder.product.description}
                 </td>
                 <td class="c-table__td">

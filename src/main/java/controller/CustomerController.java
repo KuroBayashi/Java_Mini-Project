@@ -57,6 +57,12 @@ public class CustomerController extends HttpServlet {
                 switch (action) {
                     case "login":
                         try {
+                            if (AdminController.username.equals(request.getParameter("username")) && AdminController.password.equals(request.getParameter("password"))) {
+                                session.setAttribute("isAdmin", true);
+                                response.sendRedirect(request.getContextPath() + "/admin");
+                                return;
+                            }
+                            
                             String  username = request.getParameter("username");
                             Integer password = Integer.parseInt(request.getParameter("password"));
                             
