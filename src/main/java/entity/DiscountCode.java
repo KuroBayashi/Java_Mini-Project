@@ -4,10 +4,13 @@ package entity;
 public class DiscountCode {
     
     private char code;
-    private float rate;
+    private Float rate;
     
     // Constructor
-    public DiscountCode(char code, float rate) {
+    public DiscountCode() {
+        this('\0', 0.0f);
+    }
+    public DiscountCode(char code, Float rate) {
         this.code = code;
         this.rate = rate;
     }
@@ -17,16 +20,20 @@ public class DiscountCode {
         return code;
     }
 
-    public void setCode(char code) {
+    public DiscountCode setCode(char code) {
         this.code = code;
+        
+        return this;
     }
 
-    public float getRate() {
+    public Float getRate() {
         return rate;
     }
 
-    public void setRate(float rate) {
+    public DiscountCode setRate(Float rate) {
         this.rate = rate;
+        
+        return this;
     }
     
 }

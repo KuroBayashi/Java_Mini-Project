@@ -10,6 +10,7 @@ import entity.Product;
 import entity.ProductCode;
 import entity.PurchaseOrder;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,7 +34,8 @@ public class PurchaseOrderRepository {
         
         List<PurchaseOrder> purchaseOrderList = new LinkedList<>();
         
-        String sql = "SELECT quantity, shipping_cost, sales_date, shipping_date, freight_company,"
+        String sql = "SELECT "
+                + "    quantity, shipping_cost, sales_date, shipping_date, freight_company,"
                 + "    product.product_id, product.purchase_cost, product.quantity_on_hand, product.markup, product.available, product.description AS product_description,"
                 + "    manufacturer.manufacturer_id, manufacturer.name, manufacturer.addressline1, manufacturer.addressline2, manufacturer.city, manufacturer.state, manufacturer.phone, manufacturer.fax, manufacturer.email, manufacturer.rep,"
                 + "    micro_market.zip_code, micro_market.radius, micro_market.area_length, micro_market.area_width,"
@@ -240,21 +242,25 @@ public class PurchaseOrderRepository {
         }
     }
 
-    public List<Pair<Float, ProductCode>> findAllGroupByProductCode() throws RepositoryException {
+    public List<Pair<Float, ProductCode>> findAllGroupByProductCode(Date dateStart, Date dateEnd) throws RepositoryException {
+        
         List<Pair<Float, ProductCode>> productCodeList = new LinkedList<>();
         
-        String sql = "SELECT SUM(shipping_cost + quantity * purchase_cost) AS total, prod_code, product_code.discount_code, description, rate"
+        String sql = "SELECT SUM(shipping_cost + quantity * purchase_cost) AS total, prod_code, product_code.discount_code, product_code.description, rate"
                 + " FROM purchase_order"
                 + " LEFT JOIN product ON purchase_order.product_id = product.product_id"
                 + " LEFT JOIN product_code ON product.product_code = product_code.prod_code"
                 + " LEFT JOIN discount_code ON product_code.discount_code = discount_code.discount_code"
-                + " GROUP BY prod_code"
-                + " WHERE shipping_date BETWEEN ? AND ?";
+                + " WHERE sales_date BETWEEN ? AND ?"
+                + " GROUP BY prod_code, product_code.discount_code, product_code.description, rate";
         
         try (
             Connection connection = this.dataSource.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
+            stmt.setDate(1, dateStart);
+            stmt.setDate(2, dateEnd);
+            
             try (
                 ResultSet rs = stmt.executeQuery();
             ) {
@@ -277,7 +283,85 @@ public class PurchaseOrderRepository {
                 return productCodeList;
             }
         } catch (SQLException e) {
-            throw new RepositoryException("MicroMarketRepository:findByCustomerAndNum - " + e.getMessage());
+            throw new RepositoryException("MicroMarketRepository:findAllGroupByProductCode - " + e.getMessage());
         }
     }
+    
+    public List<Pair<Float, Customer>> findAllGroupByCustomer(Date dateStart, Date dateEnd) throws RepositoryException {
+        
+        List<Pair<Float, Customer>> customerList = new LinkedList<>();
+        
+        String sql = "SELECT SUM(shipping_cost + quantity * purchase_cost) AS total, customer.customer_id, name"
+                + " FROM purchase_order"
+                + " LEFT JOIN product ON purchase_order.product_id = product.product_id"
+                + " LEFT JOIN customer ON customer.customer_id = purchase_order.customer_id"
+                + " WHERE sales_date BETWEEN ? AND ?"
+                + " GROUP BY customer.customer_id, name";
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            stmt.setDate(1, dateStart);
+            stmt.setDate(2, dateEnd);
+            
+            try (
+                ResultSet rs = stmt.executeQuery();
+            ) {
+                while (rs.next()) {
+                    customerList.add(
+                        new Pair<>(
+                            rs.getFloat("total"),
+                            (new Customer())
+                                .setId(rs.getInt("customer_id"))
+                                .setName(rs.getString("name"))
+                        )
+                    );
+                }
+                
+                return customerList;
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("MicroMarketRepository:findAllGroupByCustomer - " + e.getMessage());
+        }
+    }
+    
+        public List<Pair<Float, Location>> findAllGroupByLocation(Date dateStart, Date dateEnd) throws RepositoryException {
+        
+        List<Pair<Float, Location>> locationList = new LinkedList<>();
+        
+        String sql = "SELECT SUM(shipping_cost + quantity * purchase_cost) AS total, state"
+                + " FROM purchase_order"
+                + " LEFT JOIN product ON purchase_order.product_id = product.product_id"
+                + " LEFT JOIN customer ON customer.customer_id = purchase_order.customer_id"
+                + " WHERE sales_date BETWEEN ? AND ?"
+                + " GROUP BY state";
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            stmt.setDate(1, dateStart);
+            stmt.setDate(2, dateEnd);
+            
+            try (
+                ResultSet rs = stmt.executeQuery();
+            ) {
+                while (rs.next()) {
+                    locationList.add(
+                        new Pair<>(
+                            rs.getFloat("total"),
+                            (new Location())
+                                .setState(rs.getString("state"))
+                        )
+                    );
+                }
+                
+                return locationList;
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("MicroMarketRepository:findAllGroupByLocation - " + e.getMessage());
+        }
+    }
+    
 }

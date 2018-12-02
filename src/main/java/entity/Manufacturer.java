@@ -10,6 +10,9 @@ public class Manufacturer {
     private String rep;
     
     // Constructor
+    public Manufacturer() {
+        this(-1, "", new Location(), new Contact(), "");
+    }
     public Manufacturer(Integer id, String name, Location location, Contact contact, String rep) {
         this.id = id;
         this.name = name;
@@ -24,40 +27,50 @@ public class Manufacturer {
         return id;
     }
 
-    public void setId(Integer id) {
+    public Manufacturer setId(Integer id) {
         this.id = id;
+        
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Manufacturer setName(String name) {
         this.name = name;
+        
+        return this;
     }
 
     public Location getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public Manufacturer setLocation(Location location) {
         this.location = location;
+        
+        return this;
     }
 
     public Contact getContact() {
         return contact;
     }
 
-    public void setContact(Contact contact) {
+    public Manufacturer setContact(Contact contact) {
         this.contact = contact;
+        
+        return this;
     }
 
     public String getRep() {
         return rep;
     }
 
-    public void setRep(String rep) {
+    public Manufacturer setRep(String rep) {
         this.rep = rep;
+        
+        return this;
     }
     
 }

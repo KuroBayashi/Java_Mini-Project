@@ -6,14 +6,17 @@ public class Product {
     private Integer id;
     private Manufacturer manufacturer;
     private ProductCode code;
-    private float purchaseCost;
+    private Float purchaseCost;
     private Integer quantity;
-    private float markup;
+    private Float markup;
     private Boolean available;
     private String description;
     
     // Constructor
-    public Product(Integer id, Manufacturer manufacturer, ProductCode code, float purchaseCost, Integer quantity, float markup, Boolean available, String description) {
+    public Product() {
+        this(-1, new Manufacturer(), new ProductCode(), 0.0f, 0, 0.0f, false, "");
+    }
+    public Product(Integer id, Manufacturer manufacturer, ProductCode code, Float purchaseCost, Integer quantity, Float markup, Boolean available, String description) {
         this.id = id;
         this.manufacturer = manufacturer;
         this.code = code;
@@ -29,64 +32,80 @@ public class Product {
         return id;
     }
 
-    public void setId(Integer id) {
+    public Product setId(Integer id) {
         this.id = id;
+        
+        return this;
     }
 
     public Manufacturer getManufacturer() {
         return manufacturer;
     }
 
-    public void setManufacturer(Manufacturer manufacturer) {
+    public Product setManufacturer(Manufacturer manufacturer) {
         this.manufacturer = manufacturer;
+        
+        return this;
     }
 
     public ProductCode getCode() {
         return code;
     }
 
-    public void setCode(ProductCode code) {
+    public Product setCode(ProductCode code) {
         this.code = code;
+        
+        return this;
     }
 
-    public float getPurchaseCost() {
+    public Float getPurchaseCost() {
         return purchaseCost;
     }
 
-    public void setPurchaseCost(float purchaseCost) {
+    public Product setPurchaseCost(Float purchaseCost) {
         this.purchaseCost = purchaseCost;
+        
+        return this;
     }
 
     public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public Product setQuantity(Integer quantity) {
         this.quantity = quantity;
+        
+        return this;
     }
 
-    public float getMarkup() {
+    public Float getMarkup() {
         return markup;
     }
 
-    public void setMarkup(float markup) {
+    public Product setMarkup(Float markup) {
         this.markup = markup;
+        
+        return this;
     }
 
     public Boolean getAvailable() {
         return available;
     }
 
-    public void setAvailable(Boolean available) {
+    public Product setAvailable(Boolean available) {
         this.available = available;
+        
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public Product setDescription(String description) {
         this.description = description;
+        
+        return this;
     }
     
 }

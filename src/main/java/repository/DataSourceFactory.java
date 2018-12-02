@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 
+
 public class DataSourceFactory {
 
     public static DataSource getDataSource() throws SQLException {
@@ -17,4 +18,5 @@ public class DataSourceFactory {
 
         return ds;
     }
+    
 }

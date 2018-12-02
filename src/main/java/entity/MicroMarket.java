@@ -4,12 +4,15 @@ package entity;
 public class MicroMarket {
     
     private String zipCode;
-    private float radius;
-    private float areaLength;
-    private float areaWidth;
+    private Float radius;
+    private Float areaLength;
+    private Float areaWidth;
     
     // Constructor
-    public MicroMarket(String zipCode, float radius, float areaLength, float areaWidth) {
+    public MicroMarket() {
+        this("", 0.0f, 0.0f, 0.0f);
+    }
+    public MicroMarket(String zipCode, Float radius, Float areaLength, Float areaWidth) {
         this.zipCode = zipCode;
         this.radius = radius;
         this.areaLength = areaLength;
@@ -21,32 +24,40 @@ public class MicroMarket {
         return zipCode;
     }
 
-    public void setZipCode(String zipCode) {
+    public MicroMarket setZipCode(String zipCode) {
         this.zipCode = zipCode;
+        
+        return this;
     }
 
-    public float getRadius() {
+    public Float getRadius() {
         return radius;
     }
 
-    public void setRadius(float radius) {
+    public MicroMarket setRadius(Float radius) {
         this.radius = radius;
+        
+        return this;
     }
 
-    public float getAreaLength() {
+    public Float getAreaLength() {
         return areaLength;
     }
 
-    public void setAreaLength(float areaLength) {
+    public MicroMarket setAreaLength(Float areaLength) {
         this.areaLength = areaLength;
+        
+        return this;
     }
 
-    public float getAreaWidth() {
+    public Float getAreaWidth() {
         return areaWidth;
     }
 
-    public void setAreaWidth(float areaWidth) {
+    public MicroMarket setAreaWidth(Float areaWidth) {
         this.areaWidth = areaWidth;
+        
+        return this;
     }
     
 }

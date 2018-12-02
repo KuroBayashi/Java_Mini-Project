@@ -184,6 +184,17 @@ public class CustomerController extends HttpServlet {
                         }
                         
                         break; // End - Delete purchase order
+                    case "add_purchase_order":
+                        try {
+                            Integer productId = Integer.parseInt(request.getParameter("productId"));
+                            Integer quantity = Integer.parseInt(request.getParameter("quantity"));
+                            
+                        }
+                        catch (NumberFormatException e) {
+                            flashBag.add("danger", "");
+                        }
+                        
+                        break; // End - Add purchase order  
                     default:
                         break;
                 }

@@ -1,14 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,12 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import repository.DataSourceFactory;
 import repository.PurchaseOrderRepository;
+import repository.RepositoryException;
 
-/**
- *
- * @author pedago
- */
-@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrderController"})
+
+@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrder"})
 public class PurchaseOrderController extends HttpServlet {
 
     /**
@@ -36,34 +32,49 @@ public class PurchaseOrderController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+
+        Properties resultat = new Properties();
         
-        response.setContentType("text/html;charset=UTF-8");
+        String dataType = request.getParameter("data_type");
+        String dateStart = request.getParameter("date_start");
+        String dateEnd = request.getParameter("date_end");
         
-        // Créér le DAO avec sa source de données
+        Date dateStartSql, dateEndSql;
+        try {
+            dateStartSql = Date.valueOf(dateStart);
+        }
+        catch (IllegalArgumentException e) {
+            dateStartSql = Date.valueOf("1970-01-01");
+        }
+        try {
+            dateEndSql = Date.valueOf(dateEnd);
+        }
+        catch (IllegalArgumentException e) {
+            dateEndSql = new Date(Calendar.getInstance().getTimeInMillis());
+        }
+        
         try {
             PurchaseOrderRepository purchaseOrderRepository = new PurchaseOrderRepository(DataSourceFactory.getDataSource());
-
-            Properties resultat = new Properties();
-            try {
-                resultat.put("records", purchaseOrderRepository.findAllGroupByProductCode());
-            } catch (SQLException ex) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resultat.put("records", Collections.EMPTY_LIST);
-                resultat.put("message", ex.getMessage());
-            }
-
-            try (PrintWriter out = response.getWriter()) {
-                // On spécifie que la servlet va générer du JSON
-                response.setContentType("application/json;charset=UTF-8");
-                // Générer du JSON
-                // Gson gson = new Gson();
-                // setPrettyPrinting pour que le JSON généré soit plus lisible
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                out.println(gson.toJson(resultat));
-            }
-        }
-        catch () {
             
+            if (null == dataType || "categories".equals(dataType))
+                resultat.put("records", purchaseOrderRepository.findAllGroupByProductCode(dateStartSql, dateEndSql));
+            else if ("customers".equals(dataType)) 
+                resultat.put("records", purchaseOrderRepository.findAllGroupByCustomer(dateStartSql, dateEndSql));
+            else if ("locations".equals(dataType)) 
+                resultat.put("records", purchaseOrderRepository.findAllGroupByLocation(dateStartSql, dateEndSql));
+        }
+        catch (SQLException|RepositoryException e) {
+            response.setStatus(401);
+            resultat.put("message", e.getMessage());
+        }
+        
+        try (PrintWriter out = response.getWriter()) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            out.println(gson.toJson(resultat));
         }
     }
 
