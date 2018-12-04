@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import repository.DataSourceFactory;
 import repository.ProductRepository;
-import repository.RepositoryException;
+import exception.RepositoryException;
 import service.FlashBag;
 
 

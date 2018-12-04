@@ -1,5 +1,6 @@
 package repository;
 
+import exception.RepositoryException;
 import entity.MicroMarket;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,66 +11,73 @@ import java.util.List;
 import javax.sql.DataSource;
 
 
-public class MicroMarketRepository {
+public class MicroMarketRepository extends AbstractRepository {
     
     private final DataSource dataSource;
+    
+    private final static String SQL_SELECT = ""
+        + " SELECT "
+        + "     zip_code, radius, area_length, area_width "
+        + " FROM micro_market "
+    ;
     
     // Constructor
     public MicroMarketRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
     
-    public MicroMarket find(String zipCode) throws RepositoryException {
-
-        String sql = "SELECT zip_code, radius, area_length, area_width FROM micro_market WHERE zip_code = ?";
+    // Private Methods
+    private MicroMarket getMicroMarket(ResultSet rs) throws SQLException {
+        return new MicroMarket(
+            rs.getString("zip_code"),
+            rs.getFloat("radius"),
+            rs.getFloat("area_length"),
+            rs.getFloat("area_width")
+        );
+    }
+    
+    // Public Methods
+    public MicroMarket findOneWith(List<QueryParameter> parameters) throws RepositoryException {
+        
+        MicroMarket microMarket = null;
+        
+        String sql = this.buildQueryWith(MicroMarketRepository.SQL_SELECT, parameters);
         
         try (
             Connection connection = this.dataSource.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setString(1, zipCode);
+            this.setQueryParameters(stmt, parameters);
 
             try (
                 ResultSet rs = stmt.executeQuery();
             ) {
-                if (rs.next()) {
-                    return new MicroMarket(
-                        rs.getString("zip_code"),
-                        rs.getFloat("radius"),
-                        rs.getFloat("area_length"),
-                        rs.getFloat("area_width")
-                    );
-                }
-                else
-                    throw new SQLException("MicroMarket not found.");
+                if (rs.next())
+                    microMarket = this.getMicroMarket(rs);
             }
         } catch (SQLException e) {
-            throw new RepositoryException("MicroMarketRepository:find - " + e.getMessage());
+            throw new RepositoryException("MicroMarketRepository:findOneWith - " + e.getMessage());
         }
+        
+        return microMarket;
     }
     
     public List<MicroMarket> findAll() throws RepositoryException {
-        List<MicroMarket> microMarketList = new LinkedList<>();
-
-        String sql = "SELECT zip_code, radius, area_length, area_width FROM micro_market";
+        
+        List<MicroMarket> microMarkets = new LinkedList<>();
         
         try (
             Connection connection = this.dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(sql);   
+            PreparedStatement stmt = connection.prepareStatement(MicroMarketRepository.SQL_SELECT);   
             ResultSet rs = stmt.executeQuery();
         ) {
-            while (rs.next()) {
-                microMarketList.add(new MicroMarket(
-                    rs.getString("zip_code"),
-                    rs.getFloat("radius"),
-                    rs.getFloat("area_length"),
-                    rs.getFloat("area_width")
-                ));
-            }
+            while (rs.next())
+                microMarkets.add(this.getMicroMarket(rs));
+            
         } catch (SQLException e) {
             throw new RepositoryException("MicroMarketRepository:findAll - " + e.getMessage());
         }
 
-        return microMarketList;
+        return microMarkets;
     }
 }

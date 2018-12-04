@@ -1,6 +1,8 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -10,7 +12,9 @@
         <link rel="stylesheet" type="text/css" href="./css/design.css"> 
     </head>
     <body>
-        <%@ include file="../partial/_header.jsp" %>
+        <jsp:include page="../partial/_header.jsp">
+            <jsp:param name="home" value="${ctx}" />
+        </jsp:include>
         
         <div class="s-container-main">
             <jsp:include page="../partial/_flashes.jsp">

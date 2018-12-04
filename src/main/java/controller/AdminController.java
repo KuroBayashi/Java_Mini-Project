@@ -1,5 +1,7 @@
 package controller;
 
+import exception.AbstractException;
+import exception.AccessDeniedException;
 import java.io.IOException;
 import javafx.util.Pair;
 import javax.servlet.ServletException;
@@ -13,8 +15,8 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "AdminController", urlPatterns = {"/admin"})
 public class AdminController extends HttpServlet {
     
-    public final static String username = "root";
-    public final static String password = "toor";
+    public final static String USERNAME = "root";
+    public final static String PASSWORD = "toor";
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,12 +34,23 @@ public class AdminController extends HttpServlet {
         
         HttpSession session = request.getSession();
         
-        if (null == session.getAttribute("isAdmin")) {
-            session.setAttribute("error", new Pair<>(403, "Access denied."));
+        Boolean isAdmin = (Boolean)session.getAttribute("idAdmin");
+        
+        try {
+            if (!isAdmin)
+                throw new AccessDeniedException("AdminController: You must be logged as Admin to access to this page.");
+            
+            request.getRequestDispatcher("template/admin/home.jsp").forward(request, response);
+            
+        } catch (AbstractException e) {
+            Integer code = 0;
+            
+            if (e instanceof AbstractException)
+                code = 1; // TODO : e.getCode();
+            
+            session.setAttribute("error", new Pair<>(code, e.getMessage()));
+            
             request.getRequestDispatcher("template/error.jsp").forward(request, response);
-        }
-        else {
-            request.getRequestDispatcher("template/admin/data.jsp").forward(request, response);
         }
     }
 

@@ -1,24 +1,29 @@
 package controller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import entity.Customer;
+import entity.PurchaseOrder;
+import exception.AbstractException;
+import exception.AccessDeniedException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
+import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import repository.DataSourceFactory;
+import javax.servlet.http.HttpSession;
 import repository.PurchaseOrderRepository;
-import repository.RepositoryException;
+import repository.QueryParameter;
+import exception.RepositoryException;
+import java.sql.Date;
+import repository.RepositoryFactory;
+import service.FlashBag;
 
 
-@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrder"})
+@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrderController"})
 public class PurchaseOrderController extends HttpServlet {
 
     /**
@@ -31,50 +36,122 @@ public class PurchaseOrderController extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-
-        Properties resultat = new Properties();
+        throws ServletException, IOException {
         
-        String dataType = request.getParameter("data_type");
-        String dateStart = request.getParameter("date_start");
-        String dateEnd = request.getParameter("date_end");
+        request.setCharacterEncoding("UTF-8");
         
-        Date dateStartSql, dateEndSql;
-        try {
-            dateStartSql = Date.valueOf(dateStart);
-        }
-        catch (IllegalArgumentException e) {
-            dateStartSql = Date.valueOf("1970-01-01");
-        }
-        try {
-            dateEndSql = Date.valueOf(dateEnd);
-        }
-        catch (IllegalArgumentException e) {
-            dateEndSql = new Date(Calendar.getInstance().getTimeInMillis());
-        }
+        HttpSession session = request.getSession();
+        
+        // Flash messages
+        FlashBag flashBag = new FlashBag();
+        session.setAttribute("flashBag", flashBag);
+        
+        // Customer
+        Customer customer = (Customer)session.getAttribute("customer");
+        
+        // Action
+        String action = request.getParameter("_action");
         
         try {
-            PurchaseOrderRepository purchaseOrderRepository = new PurchaseOrderRepository(DataSourceFactory.getDataSource());
+            if (null == customer || -1 == customer.getId())
+                throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
             
-            if (null == dataType || "categories".equals(dataType))
-                resultat.put("records", purchaseOrderRepository.findAllGroupByProductCode(dateStartSql, dateEndSql));
-            else if ("customers".equals(dataType)) 
-                resultat.put("records", purchaseOrderRepository.findAllGroupByCustomer(dateStartSql, dateEndSql));
-            else if ("locations".equals(dataType)) 
-                resultat.put("records", purchaseOrderRepository.findAllGroupByLocation(dateStartSql, dateEndSql));
-        }
-        catch (SQLException|RepositoryException e) {
-            response.setStatus(401);
-            resultat.put("message", e.getMessage());
-        }
-        
-        try (PrintWriter out = response.getWriter()) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            PurchaseOrderRepository purchaseOrderRepository = RepositoryFactory.getPurchaseOrderRepository();
 
-            out.println(gson.toJson(resultat));
+            // Home
+            if (null == action) {
+                
+                List<PurchaseOrder> purchaseOrders = null;
+                
+                try {
+                    purchaseOrders = purchaseOrderRepository.findAllWith(Arrays.asList(
+                        new QueryParameter("customer_id", customer.getId())
+                    ));
+                } catch (RepositoryException e) {
+                    flashBag.add("danger", e.getMessage());
+                }
+                
+                session.setAttribute("purchaseOrders", purchaseOrders);
+                
+                request.getRequestDispatcher("template/purchaseorder/home.jsp").forward(request, response);
+            } 
+            
+            // Edit
+            else if ("edit".equals(action)) { 
+                
+                String shippingDate = request.getParameter("shipping_date");
+                String quantity     = request.getParameter("quantity");
+                
+                // TODO : Check shipping date > tomorrow
+                if (null == shippingDate || !shippingDate.matches("^\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])$"))
+                    flashBag.add("danger", "Invalid shipping date (yyyy-mm-dd)");
+                else if (null == quantity || !quantity.matches("^[1-9]+[0-9]*$"))
+                    flashBag.add("danger", "Quantity must be greater than 0.");
+                else {
+                    try {
+                        PurchaseOrder purchaseOrder = purchaseOrderRepository.findOneWith(Arrays.asList(
+                            new QueryParameter("customer_id", customer.getId()),
+                            new QueryParameter("order_num", Integer.parseInt(request.getParameter("order_num")))
+                        ));
+
+                        if (null == purchaseOrder)
+                            flashBag.add("danger", "Unknown purchase order, can't edit it.");
+                        else {
+                            purchaseOrder
+                                .setQuantity(Integer.parseInt(quantity))
+                                .setShippingDate(Date.valueOf(shippingDate))
+                                .setFreightCompany(request.getParameter("freight_company"))
+                            ;
+
+                            purchaseOrderRepository.save(purchaseOrder);
+
+                            flashBag.add("success", "You purchase order has been successfully updated.");
+                        }
+                    } catch (NumberFormatException e) {
+                        flashBag.add("danger", "Your purchase order num must be an integer.");
+                        flashBag.add("danger", "Your purchase order quantity must be an integer.");
+                    } catch (RepositoryException e) {
+                        flashBag.add("danger", e.getMessage());
+                    }
+                }
+                
+                response.sendRedirect(request.getContextPath());
+                return;
+            }
+            
+            // Delete 
+            else if ("delete".equals(action)) {
+                try {
+                    PurchaseOrder purchaseOrder = purchaseOrderRepository.findOneWith(Arrays.asList(
+                        new QueryParameter("customer_id", customer.getId()),
+                        new QueryParameter("order_num", Integer.parseInt(request.getParameter("order_num")))
+                    ));
+                    
+                    if (null == purchaseOrder)
+                        flashBag.add("danger", "Unknown purchase order, can't delete it.");
+                    else {
+                        purchaseOrderRepository.delete(purchaseOrder);
+
+                        flashBag.add("success", "Your purchase order has been successfully deleted.");
+                    }
+                } catch (NumberFormatException e) {
+                    flashBag.add("danger", "Your purchase order num must be an integer.");
+                } catch (RepositoryException e) {
+                    flashBag.add("danger", e.getMessage());
+                }
+                
+                response.sendRedirect(request.getContextPath());
+                return;
+            }
+        } catch (SQLException|AbstractException e) {
+            Integer code = 0;
+            
+            if (e instanceof AbstractException)
+                code = 1; // TODO : e.getCode();
+            
+            session.setAttribute("error", new Pair<>(code, e.getMessage()));
+            
+            request.getRequestDispatcher("template/error.jsp").forward(request, response);
         }
     }
 
@@ -89,7 +166,7 @@ public class PurchaseOrderController extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         processRequest(request, response);
     }
 
@@ -103,7 +180,7 @@ public class PurchaseOrderController extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         processRequest(request, response);
     }
 
