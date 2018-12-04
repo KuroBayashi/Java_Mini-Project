@@ -23,7 +23,7 @@ import repository.RepositoryFactory;
 import service.FlashBag;
 
 
-@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/PurchaseOrderController"})
+@WebServlet(name = "PurchaseOrderController", urlPatterns = {"/purchaseOrder"})
 public class PurchaseOrderController extends HttpServlet {
 
     /**
@@ -58,91 +58,77 @@ public class PurchaseOrderController extends HttpServlet {
             
             PurchaseOrderRepository purchaseOrderRepository = RepositoryFactory.getPurchaseOrderRepository();
 
-            // Home
-            if (null == action) {
-                
-                List<PurchaseOrder> purchaseOrders = null;
-                
-                try {
-                    purchaseOrders = purchaseOrderRepository.findAllWith(Arrays.asList(
-                        new QueryParameter("customer_id", customer.getId())
-                    ));
-                } catch (RepositoryException e) {
-                    flashBag.add("danger", e.getMessage());
-                }
-                
-                session.setAttribute("purchaseOrders", purchaseOrders);
-                
-                request.getRequestDispatcher("template/purchaseorder/home.jsp").forward(request, response);
-            } 
-            
+            if (null != action) {
             // Edit
-            else if ("edit".equals(action)) { 
-                
-                String shippingDate = request.getParameter("shipping_date");
-                String quantity     = request.getParameter("quantity");
-                
-                // TODO : Check shipping date > tomorrow
-                if (null == shippingDate || !shippingDate.matches("^\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])$"))
-                    flashBag.add("danger", "Invalid shipping date (yyyy-mm-dd)");
-                else if (null == quantity || !quantity.matches("^[1-9]+[0-9]*$"))
-                    flashBag.add("danger", "Quantity must be greater than 0.");
-                else {
+                if ("edit".equals(action)) { 
+
+                    String shippingDate = request.getParameter("shipping_date");
+                    String quantity     = request.getParameter("quantity");
+
+                    // TODO : Check shipping date > tomorrow
+                    if (null == shippingDate || !shippingDate.matches("^\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])$"))
+                        flashBag.add("danger", "Invalid shipping date (yyyy-mm-dd)");
+                    else if (null == quantity || !quantity.matches("^[1-9]+[0-9]*$"))
+                        flashBag.add("danger", "Quantity must be greater than 0.");
+                    else {
+                        try {
+                            PurchaseOrder purchaseOrder = purchaseOrderRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("c.customer_id", customer.getId()),
+                                new QueryParameter("order_num", Integer.parseInt(request.getParameter("order_num")))
+                            ));
+
+                            if (null == purchaseOrder)
+                                flashBag.add("danger", "Unknown purchase order, can't edit it.");
+                            else {
+                                purchaseOrder
+                                    .setQuantity(Integer.parseInt(quantity))
+                                    .setShippingDate(Date.valueOf(shippingDate))
+                                    .setFreightCompany(request.getParameter("freight_company"))
+                                ;
+
+                                purchaseOrderRepository.save(purchaseOrder);
+
+                                flashBag.add("success", "You purchase order has been successfully updated.");
+                            }
+                        } catch (NumberFormatException e) {
+                            flashBag.add("danger", "Your purchase order num must be an integer.");
+                            flashBag.add("danger", "Your purchase order quantity must be an integer.");
+                        } catch (RepositoryException e) {
+                            flashBag.add("danger", e.getMessage());
+                        }
+                    }
+                }
+
+                // Delete 
+                else if ("delete".equals(action)) {
                     try {
                         PurchaseOrder purchaseOrder = purchaseOrderRepository.findOneWith(Arrays.asList(
-                            new QueryParameter("customer_id", customer.getId()),
+                            new QueryParameter("c.customer_id", customer.getId()),
                             new QueryParameter("order_num", Integer.parseInt(request.getParameter("order_num")))
                         ));
 
                         if (null == purchaseOrder)
-                            flashBag.add("danger", "Unknown purchase order, can't edit it.");
+                            flashBag.add("danger", "Unknown purchase order, can't delete it.");
                         else {
-                            purchaseOrder
-                                .setQuantity(Integer.parseInt(quantity))
-                                .setShippingDate(Date.valueOf(shippingDate))
-                                .setFreightCompany(request.getParameter("freight_company"))
-                            ;
+                            purchaseOrderRepository.delete(purchaseOrder);
 
-                            purchaseOrderRepository.save(purchaseOrder);
-
-                            flashBag.add("success", "You purchase order has been successfully updated.");
+                            flashBag.add("success", "Your purchase order has been successfully deleted.");
                         }
                     } catch (NumberFormatException e) {
                         flashBag.add("danger", "Your purchase order num must be an integer.");
-                        flashBag.add("danger", "Your purchase order quantity must be an integer.");
                     } catch (RepositoryException e) {
                         flashBag.add("danger", e.getMessage());
                     }
                 }
-                
-                response.sendRedirect(request.getContextPath());
-                return;
             }
             
-            // Delete 
-            else if ("delete".equals(action)) {
-                try {
-                    PurchaseOrder purchaseOrder = purchaseOrderRepository.findOneWith(Arrays.asList(
-                        new QueryParameter("customer_id", customer.getId()),
-                        new QueryParameter("order_num", Integer.parseInt(request.getParameter("order_num")))
-                    ));
-                    
-                    if (null == purchaseOrder)
-                        flashBag.add("danger", "Unknown purchase order, can't delete it.");
-                    else {
-                        purchaseOrderRepository.delete(purchaseOrder);
+            // Default Home
+            session.setAttribute("purchaseOrders", purchaseOrderRepository.findAllWith(Arrays.asList(
+                new QueryParameter("c.customer_id", customer.getId())
+            )));
 
-                        flashBag.add("success", "Your purchase order has been successfully deleted.");
-                    }
-                } catch (NumberFormatException e) {
-                    flashBag.add("danger", "Your purchase order num must be an integer.");
-                } catch (RepositoryException e) {
-                    flashBag.add("danger", e.getMessage());
-                }
-                
-                response.sendRedirect(request.getContextPath());
-                return;
-            }
+            request.getRequestDispatcher("template/purchaseorder/home.jsp").forward(request, response);
+            
         } catch (SQLException|AbstractException e) {
             Integer code = 0;
             

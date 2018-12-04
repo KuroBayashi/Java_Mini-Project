@@ -146,7 +146,7 @@ public class PurchaseOrderRepository extends AbstractRepository {
             rs.getFloat("shipping_cost"),
             rs.getDate("sales_date"),
             rs.getDate("shipping_date"),
-            rs.getString("freightCompany")
+            rs.getString("freight_company")
         );
     }
     

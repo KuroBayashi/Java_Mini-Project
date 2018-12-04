@@ -7,7 +7,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>User:Home</title>
+        <title>PurchaseOrder:Home</title>
         
         <link rel="stylesheet" type="text/css" href="${ctx}/css/design.css"> 
     </head>
@@ -24,7 +24,7 @@
             <section class="o-grid__cols-1-4">
                 <h2>Edit Profile</h2>
                 <jsp:include page="_edit.jsp">
-                    <jsp:param name="customer" value="${customer}" />
+                    <jsp:param name="purchaseOrders" value="${purchaseOrders}" />
                 </jsp:include>
             </section>
             

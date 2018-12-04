@@ -2,7 +2,7 @@
 
 <header class="s-header-main">
     <h1>
-        <a href="<c:url value="${request.getParameter('home')}"/>" class="link link--nocolor">
+        <a href="${param.home_path}" class="link link--nocolor">
             Shopping Online
         </a>
     </h1>

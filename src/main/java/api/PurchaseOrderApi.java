@@ -18,7 +18,7 @@ import repository.PurchaseOrderRepository;
 import exception.RepositoryException;
 
 
-@WebServlet(name = "PurchaseOrderApi", urlPatterns = {"/PurchaseOrderApi"})
+@WebServlet(name = "PurchaseOrderApi", urlPatterns = {"/api/purchaseOrder"})
 public class PurchaseOrderApi extends HttpServlet {
 
     /**

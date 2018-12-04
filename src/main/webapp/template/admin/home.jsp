@@ -62,7 +62,7 @@
                     
                     $.ajax({
                         method: 'GET',
-                        url: '/Mini-Project/PurchaseOrder',
+                        url: '/Mini-Project/api/purchaseOrder',
                         data: {data_type: dataType, date_start: dateStart, date_end: dateEnd},
                         async: false,
                         success: function(result) {

@@ -23,14 +23,14 @@
                 </td>
                 <td class="c-table__td">
                     <form method="POST" id="form_edit_${purchaseOrder.num}" class="u-display--inline c-form">
-                        <input type="hidden" name="_action" value="edit_purchase_order">
-                        <input type="hidden" name="num" value="${purchaseOrder.num}">
+                        <input type="hidden" name="_action" value="edit">
+                        <input type="hidden" name="order_num" value="${purchaseOrder.num}">
 
                         <button type="submit" class="c-btn">Edit</button>
                     </form>
                     <form method="POST" class="u-display--inline c-form">
-                        <input type="hidden" name="_action" value="delete_purchase_order">
-                        <input type="hidden" name="num" value="${purchaseOrder.num}">
+                        <input type="hidden" name="_action" value="delete">
+                        <input type="hidden" name="order_num" value="${purchaseOrder.num}">
 
                         <button type="submit" class="c-btn c-btn--danger">Delete</button>
                     </form>

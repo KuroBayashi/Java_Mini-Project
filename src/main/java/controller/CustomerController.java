@@ -52,15 +52,15 @@ public class CustomerController extends HttpServlet {
         
         try {
             if (null == customer || -1 == customer.getId())
-                throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
+                throw new AccessDeniedException("CustomerController: You must be logged to access to this page.");
            
             CustomerRepository customerRepository = RepositoryFactory.getCustomerRepository();
+            MicroMarketRepository microMarketRepository = RepositoryFactory.getMicroMarketRepository();
             
             if (null != action) {
                 // Edit
                 if ("edit".equals(action)) {
-                    MicroMarketRepository microMarketRepository = RepositoryFactory.getMicroMarketRepository();
-
+                    
                     String email  = request.getParameter("email");
 
                     // RFC 822 : Email regex validation
@@ -106,13 +106,12 @@ public class CustomerController extends HttpServlet {
                             flashBag.add("danger", e.getMessage());
                         }
                     }
-
-                    response.sendRedirect(request.getContextPath());
-                    return;
                 }
             }
             
             // Default Home
+            session.setAttribute("microMarkets", microMarketRepository.findAll());
+            
             request.getRequestDispatcher("template/customer/home.jsp").forward(request, response);
         }
         catch (SQLException|AbstractException e) {

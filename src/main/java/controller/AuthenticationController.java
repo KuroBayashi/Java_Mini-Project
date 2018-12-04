@@ -106,6 +106,7 @@ public class AuthenticationController extends HttpServlet {
                     session.invalidate();
 
                     response.sendRedirect(request.getContextPath());
+                    return;
                 }
             }
             

@@ -1,8 +1,10 @@
 package controller;
 
 import entity.Customer;
+import entity.Product;
+import exception.AbstractException;
+import exception.AccessDeniedException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import javafx.util.Pair;
 import javax.servlet.ServletException;
@@ -13,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import repository.DataSourceFactory;
 import repository.ProductRepository;
-import exception.RepositoryException;
 import service.FlashBag;
 
 
@@ -36,35 +37,46 @@ public class ProductController extends HttpServlet {
         
         HttpSession session = request.getSession();
         
+        // Flash messages
         FlashBag flashBag = new FlashBag();
         session.setAttribute("flashBag", flashBag);
         
-        Customer user = (Customer)session.getAttribute("user");
+        // Customer
+        Customer customer = (Customer)session.getAttribute("customer");
+        
+        // Admin
+        Boolean isAdmin = (Boolean)session.getAttribute("isAdmin");
+        
+        // Action
+        String action = request.getParameter("_action");
         
         try {
-            ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
+            if (null == customer || -1 == customer.getId() || true != isAdmin)
+                throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
             
-            String action = request.getParameter("_action");
+            ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
+
 
             if (null != action) {
-                switch (action) {
-                    case "show_product":
-                        break; // End - Show product  
-                    default:
-                        break;
+                // Show
+                if ("show".equals(action)) {
+                    
                 }
             }
             
-            if (null == user) {
-                response.sendRedirect(request.getContextPath() + "/customer");
-            }
-            else {
-                session.setAttribute("microMarkets", productRepository.findAll());
-                request.getRequestDispatcher("template/user/profile.jsp").forward(request, response);
-            }
-        }
-        catch (SQLException|RepositoryException e) {
-            session.setAttribute("error", new Pair<>(500, e.getMessage()));
+            // Default Home
+            session.setAttribute("products", productRepository.findAll());
+            
+            request.getRequestDispatcher("template/user/profile.jsp").forward(request, response);
+            
+        } catch (SQLException|AbstractException e) {
+            Integer code = 0;
+            
+            if (e instanceof AbstractException)
+                code = 1; // TODO : e.getCode();
+            
+            session.setAttribute("error", new Pair<>(code, e.getMessage()));
+            
             request.getRequestDispatcher("template/error.jsp").forward(request, response);
         }
 

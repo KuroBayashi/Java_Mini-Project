@@ -59,7 +59,7 @@
         </div>
     </fieldset>
 
-    <input type="hidden" name="_action" value="edit_profile">
+    <input type="hidden" name="_action" value="edit">
 
     <button type="submit" class="c-btn">Edit</button>
 </form>

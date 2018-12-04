@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import service.FlashBag;
 
 
 @WebServlet(name = "AdminController", urlPatterns = {"/admin"})
@@ -34,10 +35,15 @@ public class AdminController extends HttpServlet {
         
         HttpSession session = request.getSession();
         
-        Boolean isAdmin = (Boolean)session.getAttribute("idAdmin");
+        // Flash messages
+        FlashBag flashBag = new FlashBag();
+        session.setAttribute("flashBag", flashBag);
+        
+        // Admin
+        Boolean isAdmin = (Boolean)session.getAttribute("isAdmin");
         
         try {
-            if (!isAdmin)
+            if (true != isAdmin)
                 throw new AccessDeniedException("AdminController: You must be logged as Admin to access to this page.");
             
             request.getRequestDispatcher("template/admin/home.jsp").forward(request, response);
