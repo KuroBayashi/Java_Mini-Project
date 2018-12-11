@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>PurchaseOrder:Home</title>
         
-        <link rel="stylesheet" type="text/css" href="${ctx}/css/design.css"> 
+        <link rel="stylesheet" type="text/css" href="./css/style.css"> 
     </head>
     <body>
         <jsp:include page="../partial/_header.jsp">
@@ -22,16 +22,11 @@
             </jsp:include>
             
             <section class="o-grid__cols-1-4">
-                <h2>Edit Profile</h2>
+                <h2>Edit Purchase Orders</h2>
                 <jsp:include page="_edit.jsp">
                     <jsp:param name="purchaseOrders" value="${purchaseOrders}" />
                 </jsp:include>
             </section>
-            
-            <h2>Logout</h2>
-            <jsp:include page="../auth/_logout.jsp">
-                <jsp:param name="logout_path" value="${ctx}" />
-            </jsp:include>
         </div>
         
         <%@ include file="../partial/_footer.jsp" %>

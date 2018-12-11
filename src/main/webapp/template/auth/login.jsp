@@ -9,9 +9,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>User:Login</title>
         
-        <link rel="stylesheet" type="text/css" href="${ctx}/css/design.css"> 
+        <link rel="stylesheet" type="text/css" href="./css/style.css">
     </head>
-    <body>
+    <body>        
         <jsp:include page="../partial/_header.jsp">
             <jsp:param name="home_path" value="${ctx}" />
         </jsp:include>

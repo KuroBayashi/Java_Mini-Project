@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import service.FlashBag;
+import service.ServiceContainer;
 
 
 @WebServlet(name = "AdminController", urlPatterns = {"/admin"})
@@ -30,14 +31,14 @@ public class AdminController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
         
         HttpSession session = request.getSession();
         
-        // Flash messages
-        FlashBag flashBag = new FlashBag();
-        session.setAttribute("flashBag", flashBag);
+        // Service container
+        ServiceContainer serviceContainer = (ServiceContainer)session.getAttribute("serviceContainer");
+        
+        // FlashBag
+        FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Admin
         Boolean isAdmin = (Boolean)session.getAttribute("isAdmin");

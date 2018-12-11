@@ -7,7 +7,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Admin:Data</title>
         
-        <link rel="stylesheet" type="text/css" href="./css/design.css"> 
+        <link rel="stylesheet" type="text/css" href="./css/style.css"> 
     </head>
     <body>
         <%@ include file="../partial/_header.jsp" %>

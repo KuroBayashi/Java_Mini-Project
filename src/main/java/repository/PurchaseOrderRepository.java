@@ -197,7 +197,7 @@ public class PurchaseOrderRepository extends AbstractRepository {
             }
             
         } catch (SQLException e) {
-            throw new RepositoryException("PurchaseOrderRepository:findAll - " + e.getMessage());
+            throw new RepositoryException("PurchaseOrderRepository:findAllWith - " + e.getMessage());
         }
 
         return purchaseOrders;

@@ -22,8 +22,8 @@
             </jsp:include>
             
             <section class="o-grid__cols-1-4">
-                <h2>Edit Profile</h2>
-                <jsp:include page="_edit.jsp">
+                <h2>Products</h2>
+                <jsp:include page="_showAll.jsp">
                     <jsp:param name="customer" value="${customer}" />
                 </jsp:include>
             </section>

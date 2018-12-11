@@ -16,9 +16,10 @@ import javax.servlet.http.HttpSession;
 import repository.DataSourceFactory;
 import repository.ProductRepository;
 import service.FlashBag;
+import service.ServiceContainer;
 
 
-@WebServlet(name = "ProductController", urlPatterns = {"/ProductController"})
+@WebServlet(name = "ProductController", urlPatterns = {"/product"})
 public class ProductController extends HttpServlet {
 
     /**
@@ -33,13 +34,13 @@ public class ProductController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
         
-        request.setCharacterEncoding("UTF-8");
-        
         HttpSession session = request.getSession();
         
-        // Flash messages
-        FlashBag flashBag = new FlashBag();
-        session.setAttribute("flashBag", flashBag);
+        // Service container
+        ServiceContainer serviceContainer = (ServiceContainer)session.getAttribute("serviceContainer");
+        
+        // FlashBag
+        FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Customer
         Customer customer = (Customer)session.getAttribute("customer");
@@ -56,7 +57,6 @@ public class ProductController extends HttpServlet {
             
             ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
 
-
             if (null != action) {
                 // Show
                 if ("show".equals(action)) {
@@ -67,7 +67,7 @@ public class ProductController extends HttpServlet {
             // Default Home
             session.setAttribute("products", productRepository.findAll());
             
-            request.getRequestDispatcher("template/user/profile.jsp").forward(request, response);
+            request.getRequestDispatcher("template/product/home.jsp").forward(request, response);
             
         } catch (SQLException|AbstractException e) {
             Integer code = 0;

@@ -20,6 +20,7 @@ import repository.CustomerRepository;
 import repository.QueryParameter;
 import repository.RepositoryFactory;
 import service.FlashBag;
+import service.ServiceContainer;
 
 
 @WebServlet(name = "CustomerController", urlPatterns = {"/customer"})
@@ -36,14 +37,14 @@ public class CustomerController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
         
         HttpSession session = request.getSession();
         
-        // Flash messages
-        FlashBag flashBag = new FlashBag();
-        session.setAttribute("flashBag", flashBag);
+        // Service container
+        ServiceContainer serviceContainer = (ServiceContainer)session.getAttribute("serviceContainer");
+        
+        // FlashBag
+        FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Customer
         Customer customer = (Customer)session.getAttribute("customer");

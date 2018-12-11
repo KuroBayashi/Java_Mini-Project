@@ -7,7 +7,6 @@ import exception.AccessDeniedException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +20,7 @@ import exception.RepositoryException;
 import java.sql.Date;
 import repository.RepositoryFactory;
 import service.FlashBag;
+import service.ServiceContainer;
 
 
 @WebServlet(name = "PurchaseOrderController", urlPatterns = {"/purchaseOrder"})
@@ -38,13 +38,13 @@ public class PurchaseOrderController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
         
-        request.setCharacterEncoding("UTF-8");
-        
         HttpSession session = request.getSession();
         
-        // Flash messages
-        FlashBag flashBag = new FlashBag();
-        session.setAttribute("flashBag", flashBag);
+        // Service container
+        ServiceContainer serviceContainer = (ServiceContainer)session.getAttribute("serviceContainer");
+        
+        // FlashBag
+        FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Customer
         Customer customer = (Customer)session.getAttribute("customer");

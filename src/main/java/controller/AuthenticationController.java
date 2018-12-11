@@ -1,7 +1,6 @@
 package controller;
 
 import entity.Customer;
-import exception.AccessDeniedException;
 import exception.RepositoryException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -17,9 +16,10 @@ import repository.CustomerRepository;
 import repository.QueryParameter;
 import repository.RepositoryFactory;
 import service.FlashBag;
+import service.ServiceContainer;
 
 
-@WebServlet(name = "AuthenticationController", urlPatterns = {"/"})
+@WebServlet(name = "AuthenticationController", urlPatterns = {""})
 public class AuthenticationController extends HttpServlet {
 
     /**
@@ -33,19 +33,18 @@ public class AuthenticationController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
         
-        HttpSession session = request.getSession();
+        // Session and Disconnect
+        HttpSession session = request.getSession(false);
+        if (null != session)
+            session.invalidate();
+        session = request.getSession();
         
-        // Flash messages
-        FlashBag flashBag = new FlashBag();
-        session.setAttribute("flashBag", flashBag);
+        // Service container
+        ServiceContainer serviceContainer = (ServiceContainer)session.getAttribute("serviceContainer");
         
-        // Customer
-        Customer customer = (Customer)session.getAttribute("customer");
-        if (null == customer)
-            customer = new Customer();
+        // FlashBag
+        FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Action
         String action = request.getParameter("_action");
@@ -80,7 +79,7 @@ public class AuthenticationController extends HttpServlet {
                     }
                     else {
                         try {
-                            customer = userRepository.findOneWith(Arrays.asList(
+                            Customer customer = userRepository.findOneWith(Arrays.asList(
                                 new QueryParameter("email", username),
                                 new QueryParameter("customer_id", Integer.parseInt(password))
                             ));
@@ -101,13 +100,9 @@ public class AuthenticationController extends HttpServlet {
                         }
                     }
                 }
-                else if ("logout".equals(action)) {
-                
-                    session.invalidate();
-
-                    response.sendRedirect(request.getContextPath());
-                    return;
-                }
+//                else if ("logout".equals(action)) {
+//                    session.invalidate();
+//                }
             }
             
             // Default Home

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class FlashBag {
+public class FlashBag extends AbstractService {
     
     private Map<String, ArrayList<String>> bag = new HashMap<>();
     
@@ -26,5 +26,9 @@ public class FlashBag {
             return this.bag.get(type);
         
         return null;
+    }
+    
+    public void clear() {
+        this.bag.clear();
     }
 }

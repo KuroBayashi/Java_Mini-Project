@@ -1,4 +1,4 @@
-<form method="POST" action="${param.logout_path}" class="o-wrapper c-form">
+<form method="POST" action="${pageContext.request.contextPath}" class="c-form">
     <input type="hidden" name="_action" value="logout">
 
     <button type="submit" class="c-btn c-btn--danger">Logout</button>

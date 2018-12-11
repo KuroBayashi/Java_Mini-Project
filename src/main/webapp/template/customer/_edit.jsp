@@ -27,7 +27,7 @@
             <label for="zip">Zip <span class="c-form__label-info">(10 characters max)</span></label>
             <select name="zip" id="zip">
                 <c:forEach var="microMarket" items="${microMarkets}">
-                    <option value="${microMarket.zipCode}" <c:if test="${microMarket.zipCode == user.location.microMarket.zipCode}">selected="selected"</c:if>>
+                    <option value="${microMarket.zipCode}" <c:if test="${microMarket.zipCode == customer.location.microMarket.zipCode}">selected="selected"</c:if>>
                         ${microMarket.zipCode}
                     </option>
                 </c:forEach>
