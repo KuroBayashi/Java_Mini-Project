@@ -1,6 +1,8 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -62,7 +64,7 @@
                     
                     $.ajax({
                         method: 'GET',
-                        url: '/Mini-Project/api/purchaseOrder',
+                        url: '${ctx}/api/purchaseOrder',
                         data: {data_type: dataType, date_start: dateStart, date_end: dateEnd},
                         async: false,
                         success: function(result) {

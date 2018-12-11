@@ -132,16 +132,18 @@ input[type="number"] {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
 }
+.o-grid-gap--s {
+    grid-gap: 10px;
+}
 .o-grid-gap--m {
     grid-gap: 20px;
 }
-.o-grid__cols-1-4 {
-    grid-column: 1 / 5;
+.o-grid__cols--4 {
+    grid-column-end: span 4;
 }
-.o-grid__cols-4-12 {
-    grid-column: 5 / 13;
+.o-grid__cols--6 {
+    grid-column-end: span 6;
 }
-
 
 /*
  *  Component
@@ -252,6 +254,25 @@ input[type="number"] {
     list-style: none;
 }
 .c-list__item {
+    
+}
+
+/* Cards */
+.c-card {
+    border: 1px solid #141414;
+}
+.c-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    min-height: 60px;
+    
+    color: #f1f1f1;
+    
+    background: #141414;
+}
+.c-card__footer {
     
 }
 

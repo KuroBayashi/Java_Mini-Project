@@ -21,11 +21,33 @@
                 <jsp:param name="flashBag" value="${flashBag}" />
             </jsp:include>
             
-            <section class="o-grid__cols-1-4">
+            <section>
                 <h2>Products</h2>
-                <jsp:include page="_showAll.jsp">
-                    <jsp:param name="customer" value="${customer}" />
-                </jsp:include>
+                
+                <div class="o-grid o-grid-gap--s">
+                    <c:forEach var="product" items="${products}">
+                        <div class="o-grid__cols--4 c-card">
+                            <header class="o-wrapper-inside c-card__header">
+                                <h3>${product.description}</h3>
+                            </header>
+                            <div class="c-card__content">
+                                <ul>
+                                    <li>Purchase cost : ${product.purchaseCost}</li>
+                                    <li>Markup : ${product.markup}</li>
+                                    <li>Quantity on hand : ${product.quantity}</li>
+                                </ul>
+                            </div>
+                            <footer class="o-wrapper-inside c-card__footer">
+                                <form method="POST">
+                                    <input type="hidden" name="_action" value="show">
+                                    <input type="hidden" name="product_id" value="${product.id}">
+
+                                    <button type="submit" class="c-btn">View more</button>
+                                </form>
+                            </footer>
+                        </div>
+                    </c:forEach>
+                </div>
             </section>
         </div>
         

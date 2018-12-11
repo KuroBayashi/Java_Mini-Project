@@ -52,14 +52,14 @@ public class ProductController extends HttpServlet {
         String action = request.getParameter("_action");
         
         try {
-            if (null == customer || -1 == customer.getId() || true != isAdmin)
+            if ((null == customer || -1 == customer.getId()) && true != isAdmin)
                 throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
             
             ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
 
             if (null != action) {
                 // Show
-                if ("show".equals(action)) {
+                if ("edit".equals(action)) {
                     
                 }
             }
