@@ -66,7 +66,7 @@ public class PurchaseOrderApi extends HttpServlet {
             else if ("locations".equals(dataType)) 
                 resultat.put("records", purchaseOrderRepository.findAllGroupByLocation(dateStartSql, dateEndSql));
         }
-        catch (SQLException|RepositoryException e) {
+        catch (RepositoryException e) {
             response.setStatus(401);
             resultat.put("message", e.getMessage());
         }

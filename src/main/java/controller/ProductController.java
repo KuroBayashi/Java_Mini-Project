@@ -86,7 +86,7 @@ public class ProductController extends HttpServlet {
             
             request.getRequestDispatcher("/WEB-INF/template/product/home.jsp").forward(request, response);
             
-        } catch (SQLException|AbstractException e) {  
+        } catch (AbstractException e) {  
             session.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
