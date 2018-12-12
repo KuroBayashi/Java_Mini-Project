@@ -5,7 +5,6 @@ import exception.RepositoryException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
-import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -109,9 +108,7 @@ public class AuthenticationController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/template/auth/login.jsp").forward(request, response);
             
         } catch (SQLException e) {
-            int errorCode = 0;
-            
-            session.setAttribute("error", new Pair<>(errorCode, e.getMessage()));
+            session.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
         

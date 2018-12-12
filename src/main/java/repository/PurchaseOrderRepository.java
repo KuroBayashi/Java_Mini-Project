@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javafx.util.Pair;
 import javax.sql.DataSource;
+import repository.Pair;
 
 
 public class PurchaseOrderRepository extends AbstractRepository {

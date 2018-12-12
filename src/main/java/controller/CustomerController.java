@@ -7,7 +7,6 @@ import exception.AccessDeniedException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
-import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -116,13 +115,7 @@ public class CustomerController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/template/customer/home.jsp").forward(request, response);
         }
         catch (SQLException|AbstractException e) {
-            Integer code = 0;
-            
-            if (e instanceof AbstractException)
-                code = 1; // TODO : e.getCode();
-            
-            session.setAttribute("error", new Pair<>(code, e.getMessage()));
-            
+            session.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }

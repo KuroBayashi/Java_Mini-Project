@@ -3,7 +3,6 @@ package controller;
 import exception.AbstractException;
 import exception.AccessDeniedException;
 import java.io.IOException;
-import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -50,12 +49,8 @@ public class AdminController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/template/admin/home.jsp").forward(request, response);
             
         } catch (AbstractException e) {
-            Integer code = 0;
             
-            if (e instanceof AbstractException)
-                code = 1; // TODO : e.getCode();
-            
-            session.setAttribute("error", new Pair<>(code, e.getMessage()));
+            session.setAttribute("error", e.getMessage());
             
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
