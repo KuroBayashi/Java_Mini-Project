@@ -12,6 +12,7 @@
     
     <listener>
         <listener-class>
+            listener.ApplicationListener
             listener.SessionListener
         </listener-class>
     </listener>

@@ -38,10 +38,10 @@ public class ApplicationListener implements ServletContextListener {
                 ProductRepository dao = new ProductRepository(DataSourceFactory.getDataSource());
                 
                 List<Product> allCodes = dao.findAll();
-                Logger.getLogger("DiscountEditor").log(Level.INFO, "Database already exists");
+                Logger.getLogger("WebShop").log(Level.INFO, "Database already exists");
                 result = true;
             } catch (Exception ex) {
-                Logger.getLogger("DiscountEditor").log(Level.INFO, "Database does not exist");
+                Logger.getLogger("WebShop").log(Level.INFO, "Database does not exist");
             }
             return result;
 	}
@@ -53,18 +53,18 @@ public class ApplicationListener implements ServletContextListener {
 			}
 		};
 		
-		Logger.getLogger("DiscountEditor").log(Level.INFO, "Creating databse from SQL script");
+		Logger.getLogger("WebShop").log(Level.INFO, "Creating databse from SQL script");
 		try {
 			Connection connection = DataSourceFactory.getDataSource().getConnection();
 			int result = ij.runScript(connection, this.getClass().getResourceAsStream("export.sql"), "UTF-8", System.out /* nowhere */ , "UTF-8");
 			if (result == 0) {
-				Logger.getLogger("DiscountEditor").log(Level.INFO, "Database succesfully created");
+				Logger.getLogger("WebShop").log(Level.INFO, "Database succesfully created");
 			} else {
-				Logger.getLogger("DiscountEditor").log(Level.SEVERE, "Errors creating database");
+				Logger.getLogger("WebShop").log(Level.SEVERE, "Errors creating database");
 			}
 
 		} catch (Exception e) {
-			Logger.getLogger("DiscountEditor").log(Level.SEVERE, null, e);
+			Logger.getLogger("WebShop").log(Level.SEVERE, null, e);
 		}
 
 	}
