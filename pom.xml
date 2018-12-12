@@ -26,11 +26,11 @@
             <artifactId>derbyclient</artifactId>
             <version>10.14.1.0</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>org.wildfly.swarm</groupId>
             <artifactId>javafx</artifactId>
             <version>2017.4.0</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -61,19 +61,11 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.8.3</version>
-                <configuration>
-                    <mainClass>your.package.with.Launcher</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.6</version>
                 <executions>
-                    <execution>
+<!--                    <execution>
                         <phase>package</phase>
                         <goals><goal>copy</goal></goals>
                         <configuration>
@@ -86,8 +78,8 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                    </execution>
-<!--                    <execution>
+                    </execution>-->
+                    <execution>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy</goal>
@@ -104,7 +96,7 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                    </execution>-->
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

@@ -113,7 +113,7 @@ public class CustomerController extends HttpServlet {
             // Default Home
             session.setAttribute("microMarkets", microMarketRepository.findAll());
             
-            request.getRequestDispatcher("template/customer/home.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/customer/home.jsp").forward(request, response);
         }
         catch (SQLException|AbstractException e) {
             Integer code = 0;
@@ -123,7 +123,7 @@ public class CustomerController extends HttpServlet {
             
             session.setAttribute("error", new Pair<>(code, e.getMessage()));
             
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }
     

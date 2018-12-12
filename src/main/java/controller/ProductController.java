@@ -4,8 +4,10 @@ import entity.Customer;
 import entity.Product;
 import exception.AbstractException;
 import exception.AccessDeniedException;
+import exception.RepositoryException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import javafx.util.Pair;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import repository.DataSourceFactory;
 import repository.ProductRepository;
+import repository.QueryParameter;
 import service.FlashBag;
 import service.ServiceContainer;
 
@@ -58,26 +61,38 @@ public class ProductController extends HttpServlet {
             ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
 
             if (null != action) {
-                // Show
-                if ("edit".equals(action)) {
+                // Create
+                if ("create".equals(action)) {
+                    // Create product
+                }
+                
+                // Edit
+                else if ("edit".equals(action)) {
+                    if (null != request.getParameter("submit")) {
+                        // Traitement du formulaire
+                        // Redirection vers la page du produit
+                    }
                     
+                    // Affichage du formulaire
+                }
+                
+                // Edit
+                else if ("delete".equals(action)) {
+                    // Delete
                 }
             }
             
             // Default Home
             session.setAttribute("products", productRepository.findAll());
             
-            request.getRequestDispatcher("template/product/home.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/product/home.jsp").forward(request, response);
             
         } catch (SQLException|AbstractException e) {
             Integer code = 0;
             
-            if (e instanceof AbstractException)
-                code = 1; // TODO : e.getCode();
-            
             session.setAttribute("error", new Pair<>(code, e.getMessage()));
             
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
 
     }

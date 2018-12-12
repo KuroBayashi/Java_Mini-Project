@@ -47,7 +47,7 @@ public class AdminController extends HttpServlet {
             if (true != isAdmin)
                 throw new AccessDeniedException("AdminController: You must be logged as Admin to access to this page.");
             
-            request.getRequestDispatcher("template/admin/home.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/admin/home.jsp").forward(request, response);
             
         } catch (AbstractException e) {
             Integer code = 0;
@@ -57,7 +57,7 @@ public class AdminController extends HttpServlet {
             
             session.setAttribute("error", new Pair<>(code, e.getMessage()));
             
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }
 

@@ -106,13 +106,13 @@ public class AuthenticationController extends HttpServlet {
             }
             
             // Default Home
-            request.getRequestDispatcher("template/auth/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/auth/login.jsp").forward(request, response);
             
         } catch (SQLException e) {
             int errorCode = 0;
             
             session.setAttribute("error", new Pair<>(errorCode, e.getMessage()));
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
         
     }

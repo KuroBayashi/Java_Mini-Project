@@ -127,7 +127,7 @@ public class PurchaseOrderController extends HttpServlet {
                 new QueryParameter("c.customer_id", customer.getId())
             )));
 
-            request.getRequestDispatcher("template/purchaseorder/home.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/purchaseOrder/home.jsp").forward(request, response);
             
         } catch (SQLException|AbstractException e) {
             Integer code = 0;
@@ -137,7 +137,7 @@ public class PurchaseOrderController extends HttpServlet {
             
             session.setAttribute("error", new Pair<>(code, e.getMessage()));
             
-            request.getRequestDispatcher("template/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }
 

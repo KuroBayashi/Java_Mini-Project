@@ -73,9 +73,11 @@ input[type="number"] {
     
     min-height: 40px;
     
-    padding: 0 20px;
+    padding: 0 40px;
     
     background: #4c4c4c;
+    
+    overflow: hidden;
 }
 .s-nav-main__link {
     display: flex;
@@ -94,7 +96,7 @@ input[type="number"] {
 
 /* Page */
 .s-container-main {
-    margin: 10px 10vw;
+    margin: 10px 10vw 20px 10vw;
 }
 
 /* Footer */
@@ -259,6 +261,9 @@ input[type="number"] {
 
 /* Cards */
 .c-card {
+    display: flex;
+    flex-direction: column;
+    
     border: 1px solid #141414;
 }
 .c-card__header {
@@ -271,6 +276,9 @@ input[type="number"] {
     color: #f1f1f1;
     
     background: #141414;
+}
+.c-card__content {
+    flex-grow: 1;
 }
 .c-card__footer {
     

@@ -17,7 +17,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 
-public class ProductRepository {
+public class ProductRepository extends AbstractRepository {
     
     private final DataSource dataSource;
     
@@ -90,13 +90,38 @@ public class ProductRepository {
     }
     
     // Public Methods
+    public Product findOneWith(List<QueryParameter> parameters) throws RepositoryException {
+        
+        Product product = null;
+        
+        String sql = this.buildQueryWith(SQL_SELECT, parameters);
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            this.setQueryParameters(stmt, parameters);
+
+            try (
+                ResultSet rs = stmt.executeQuery();
+            ) {
+                if (rs.next())
+                    product = this.getProduct(rs);
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("ProductRepository:findOneWith - " + e.getMessage());
+        }
+        
+        return product;
+    }
+    
     public List<Product> findAll() throws RepositoryException {
         
         List<Product> products = new LinkedList<>();
         
         try (
             Connection connection = this.dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(ProductRepository.SQL_SELECT);
+            PreparedStatement stmt = connection.prepareStatement(SQL_SELECT);
             ResultSet rs = stmt.executeQuery();
         ) {
             while (rs.next())
