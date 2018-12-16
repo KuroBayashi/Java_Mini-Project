@@ -12,6 +12,18 @@
         
         <div class="o-wrapper">
             ${error}
+            
+            <c:choose>
+                <c:when test="${true == isAdmin}">
+                    <a href="${ctx}/admin" class="link">Back to admin panel</a>
+                </c:when>
+                <c:when test="${null != customer}">
+                    <a href="${ctx}/customer">Back to your profile</a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${ctx}">Back to login page</a>
+                </c:otherwise>
+            </c:choose>
         </div>
     </jsp:attribute>
 

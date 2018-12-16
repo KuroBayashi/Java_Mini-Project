@@ -9,7 +9,15 @@
  
     <jsp:attribute name="body">
         <h2>Home Product</h2>
+        
+        <c:if test="${true == isAdmin}">
+            <form method="POST" class="c-form">
+                <input type="hidden" name="_action" value="create">
 
+                <button type="submit" class="c-btn">Create new product</button>
+            </form>
+        </c:if>
+        
         <div class="o-wrapper o-grid o-grid-gap--s">
             <c:forEach var="product" items="${products}">
                 <div class="o-grid__cols--4 c-card">
@@ -22,6 +30,7 @@
                             <li>Markup : ${product.markup}</li>
                             <li>Quantity on hand : ${product.quantity}</li>
                             <li>Manufacturer : ${product.manufacturer.name}</li>
+                            <li>Product code : ${product.code.description}</li>
                         </ul>
                     </div>
                     <footer class="o-wrapper-inside c-card__footer">
@@ -40,12 +49,6 @@
                                     <input type="hidden" name="product_id" value="${product.id}">
 
                                     <button type="submit" class="c-btn">Edit</button>
-                                </form>
-                                <form method="POST" class="u-display--inline c-form">
-                                    <input type="hidden" name="_action" value="delete">
-                                    <input type="hidden" name="product_id" value="${product.id}">
-
-                                    <button type="submit" class="c-btn c-btn--danger">Delete</button>
                                 </form>
                             </c:when>
                         </c:choose>

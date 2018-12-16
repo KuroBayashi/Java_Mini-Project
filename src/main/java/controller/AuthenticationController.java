@@ -108,7 +108,7 @@ public class AuthenticationController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/template/auth/login.jsp").forward(request, response);
             
         } catch (SQLException e) {
-            session.setAttribute("error", e.getMessage());
+            request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
         

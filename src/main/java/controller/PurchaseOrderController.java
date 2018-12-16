@@ -1,6 +1,7 @@
 package controller;
 
 import entity.Customer;
+import entity.Product;
 import entity.PurchaseOrder;
 import exception.AbstractException;
 import exception.AccessDeniedException;
@@ -17,6 +18,8 @@ import repository.PurchaseOrderRepository;
 import repository.QueryParameter;
 import exception.RepositoryException;
 import java.sql.Date;
+import java.util.Calendar;
+import repository.ProductRepository;
 import repository.RepositoryFactory;
 import service.FlashBag;
 import service.ServiceContainer;
@@ -56,10 +59,47 @@ public class PurchaseOrderController extends HttpServlet {
                 throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
             
             PurchaseOrderRepository purchaseOrderRepository = RepositoryFactory.getPurchaseOrderRepository();
+            ProductRepository productRepository = RepositoryFactory.getProductRepository();
 
             if (null != action) {
-            // Edit
-                if ("edit".equals(action)) { 
+                // Create
+                if ("create".equals(action)) {
+                    try {
+                        Product product = productRepository.findOneWith(Arrays.asList(
+                            new QueryParameter("product_id", Integer.parseInt(request.getParameter("product_id")))
+                        ));
+                        
+                        if (null == product)
+                            flashBag.add("danger", "Unknown product, can't purchase it.");
+                        else {
+                            Calendar calendar = Calendar.getInstance();
+
+                            PurchaseOrder purchaseOrder = new PurchaseOrder()
+                                .setCustomer(customer)
+                                .setProduct(product)
+                                .setQuantity(1)
+                                .setSalesDate(new Date(calendar.getTimeInMillis()))
+                                .setShippingCost(product.getPurchaseCost())
+                                .setFreightCompany("UPS")
+                            ;
+
+                            calendar.add(Calendar.DAY_OF_YEAR, 7);
+                            purchaseOrder.setShippingDate(new Date(calendar.getTimeInMillis()));
+                            
+                            purchaseOrderRepository.save(purchaseOrder);
+                            
+                            flashBag.add("success", "Your purchase order has been successfully created.");
+                        }
+                        
+                    } catch (NumberFormatException e) {
+                        flashBag.add("danger", "Your purchase order num must be an integer.");
+                    } catch (RepositoryException e) {
+                        flashBag.add("danger", e.getMessage());
+                    }
+                }
+                
+                // Edit
+                else if ("edit".equals(action)) { 
 
                     String shippingDate = request.getParameter("shipping_date");
                     String quantity     = request.getParameter("quantity");
@@ -122,14 +162,14 @@ public class PurchaseOrderController extends HttpServlet {
             }
             
             // Default Home
-            session.setAttribute("purchaseOrders", purchaseOrderRepository.findAllWith(Arrays.asList(
+            request.setAttribute("purchaseOrders", purchaseOrderRepository.findAllWith(Arrays.asList(
                 new QueryParameter("c.customer_id", customer.getId())
             )));
 
             request.getRequestDispatcher("/WEB-INF/template/purchaseOrder/home.jsp").forward(request, response);
             
         } catch (SQLException|AbstractException e) {
-            session.setAttribute("error", e.getMessage());
+            request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }

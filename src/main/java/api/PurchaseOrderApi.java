@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Properties;
 import javax.servlet.ServletException;
@@ -13,9 +12,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import repository.DataSourceFactory;
 import repository.PurchaseOrderRepository;
 import exception.RepositoryException;
+import java.sql.SQLException;
+import repository.RepositoryFactory;
 
 
 @WebServlet(name = "PurchaseOrderApi", urlPatterns = {"/api/purchaseOrder"})
@@ -57,7 +57,7 @@ public class PurchaseOrderApi extends HttpServlet {
         }
         
         try {
-            PurchaseOrderRepository purchaseOrderRepository = new PurchaseOrderRepository(DataSourceFactory.getDataSource());
+            PurchaseOrderRepository purchaseOrderRepository = RepositoryFactory.getPurchaseOrderRepository();
             
             if (null == dataType || "categories".equals(dataType))
                 resultat.put("records", purchaseOrderRepository.findAllGroupByProductCode(dateStartSql, dateEndSql));
@@ -66,7 +66,7 @@ public class PurchaseOrderApi extends HttpServlet {
             else if ("locations".equals(dataType)) 
                 resultat.put("records", purchaseOrderRepository.findAllGroupByLocation(dateStartSql, dateEndSql));
         }
-        catch (RepositoryException e) {
+        catch (SQLException|RepositoryException e) {
             response.setStatus(401);
             resultat.put("message", e.getMessage());
         }

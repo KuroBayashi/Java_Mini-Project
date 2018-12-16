@@ -87,7 +87,7 @@ public class CustomerRepository extends AbstractRepository {
         
         Customer customer = null;
         
-        String sql = this.buildQueryWith(CustomerRepository.SQL_SELECT, parameters);
+        String sql = this.buildQueryWith(SQL_SELECT, parameters);
         
         try (
             Connection connection = this.dataSource.getConnection();
@@ -115,13 +115,13 @@ public class CustomerRepository extends AbstractRepository {
         
         // Query type : Insert or Update
         if (-1 == customer.getId())
-            sql = CustomerRepository.SQL_INSERT;
+            sql = SQL_INSERT;
         else {
             parameters = Arrays.asList(
                 new QueryParameter("customer_id", customer.getId())
             ); 
             
-            sql = this.buildQueryWith(CustomerRepository.SQL_UPDATE, parameters);
+            sql = this.buildQueryWith(SQL_UPDATE, parameters);
         }
         
         // Run query

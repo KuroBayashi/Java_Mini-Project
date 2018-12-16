@@ -17,7 +17,6 @@
                     <th class="c-table__th">Quantity</th>
                     <th class="c-table__th">Purchase cost</th>
                     <th class="c-table__th">Markup</th>
-                    <th class="c-table__th">Available</th>
                     <th class="c-table__th">Options</th>
                 </tr>
             </thead>
@@ -25,19 +24,19 @@
                 <c:forEach var="product" items="${products}">
                     <tr>
                         <td class="c-table__td">
-                            <input type="text" name="description" value="${product.description}">
+                            ${product.description}
                         </td>
                         <td class="c-table__td">
-                            <select name="code">
+                            <select name="code" form="form_edit_${product.id}">
                                 <c:forEach var="productCode" items="${productCodes}">
-                                    <option value="${product_code.code}" <c:if test="${product_code.code == product.productCode.code}">selected="selected"</c:if> >
-                                        ${product_code.description}
+                                    <option value="${productCode.code}" <c:if test="${productCode.code == product.code.code}">selected="selected"</c:if> >
+                                        ${productCode.description}
                                     </option>
                                 </c:forEach>
                             </select>
                         </td>
                         <td class="c-table__td">
-                            <select name="manufacturer_id">
+                            <select name="manufacturer_id" form="form_edit_${product.id}">
                                 <c:forEach var="manufacturer" items="${manufacturers}">
                                     <option value="${manufacturer.id}" <c:if test="${manufacturer.id == product.manufacturer.id}">selected="selected"</c:if> >
                                         ${manufacturer.name}
@@ -46,23 +45,20 @@
                             </select>
                         </td>
                         <td class="c-table__td">
-                            <input type="number" name="quantity_on_hand" value="${product.quantityOnHand}" min="0">
+                            <input type="number" name="quantity" value="${product.quantity}" min="0" form="form_edit_${product.id}">
                         </td>
                         <td class="c-table__td">
-                            <input type="number" name="purchase_cost" value="${product.purchaseCost}" step="0.01">
+                            <input type="number" name="purchase_cost" value="${product.purchaseCost}" step="0.01" form="form_edit_${product.id}">
                         </td>
                         <td class="c-table__td">
-                            <input type="number" name="markup" value="${product.markup}">
-                        </td>
-                        <td class="c-table__td">
-                            <input type="checkbox" name="available" value="available">
+                            <input type="number" name="markup" value="${product.markup}" step="0.01" form="form_edit_${product.id}">
                         </td>
                         <td class="c-table__td">
                             <form method="POST" id="form_edit_${product.id}" class="u-display--inline c-form">
                                 <input type="hidden" name="_action" value="edit">
                                 <input type="hidden" name="product_id" value="${product.id}">
 
-                                <button type="submit" class="c-btn">Edit</button>
+                                <button type="submit" name="submit" class="c-btn">Edit</button>
                             </form>
                             <form method="POST" class="u-display--inline c-form">
                                 <input type="hidden" name="_action" value="delete">

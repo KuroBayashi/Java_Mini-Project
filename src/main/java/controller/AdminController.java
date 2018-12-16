@@ -40,7 +40,7 @@ public class AdminController extends HttpServlet {
         FlashBag flashBag = serviceContainer.getFlashBag();
         
         // Admin
-        Boolean isAdmin = (Boolean)session.getAttribute("isAdmin");
+        Boolean isAdmin = (null != session.getAttribute("isAdmin")) ? (Boolean)session.getAttribute("isAdmin") : false;
         
         try {
             if (true != isAdmin)

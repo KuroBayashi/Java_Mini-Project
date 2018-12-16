@@ -41,7 +41,7 @@ public class MicroMarketRepository extends AbstractRepository {
         
         MicroMarket microMarket = null;
         
-        String sql = this.buildQueryWith(MicroMarketRepository.SQL_SELECT, parameters);
+        String sql = this.buildQueryWith(SQL_SELECT, parameters);
         
         try (
             Connection connection = this.dataSource.getConnection();
@@ -68,7 +68,7 @@ public class MicroMarketRepository extends AbstractRepository {
         
         try (
             Connection connection = this.dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(MicroMarketRepository.SQL_SELECT);   
+            PreparedStatement stmt = connection.prepareStatement(SQL_SELECT);   
             ResultSet rs = stmt.executeQuery();
         ) {
             while (rs.next())

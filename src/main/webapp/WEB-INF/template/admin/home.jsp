@@ -21,10 +21,10 @@
                 <label for="categories">Categories</label>
 
                 <input type="radio" name="data_type" value="customers" id="customers" class="js-radio">
-                <label for="customers">User</label>
+                <label for="customers">Customers</label>
 
                 <input type="radio" name="data_type" value="locations" id="locations" class="js-radio">
-                <label for="locations">Location</label>
+                <label for="locations">Locations</label>
             </fieldset>
             <fieldset>
                 <legend>Period</legend>

@@ -16,4 +16,16 @@ public class RepositoryFactory {
     public static PurchaseOrderRepository getPurchaseOrderRepository() throws SQLException {
         return new PurchaseOrderRepository(DataSourceFactory.getDataSource());
     }
+    
+    public static ProductRepository getProductRepository() throws SQLException {
+        return new ProductRepository(DataSourceFactory.getDataSource());
+    }
+    
+    public static ManufacturerRepository getManufacturerRepository() throws SQLException {
+        return new ManufacturerRepository(DataSourceFactory.getDataSource());
+    }
+    
+    public static ProductCodeRepository getProductCodeRepository() throws SQLException {
+        return new ProductCodeRepository(DataSourceFactory.getDataSource());
+    }
 }

@@ -1,4 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
@@ -33,9 +33,12 @@
         </li>
     </ul>
     
-    <c:if test="${true == isAdmin or (null != customer && -1 != customer.id)}">
-        <jsp:include page="../auth/_logout.jsp">
-            <jsp:param name="logout_path" value="${ctx}" />
-        </jsp:include>
-    </c:if>
+    <c:choose>
+        <c:when test="${true == isAdmin or (null != customer && -1 != customer.id)}">
+            <%@ include file="/WEB-INF/template/auth/_logout.jsp" %>
+        </c:when>
+        <c:otherwise>
+            <a href="${ctx}" class="link link--no-decoration c-btn">Login</a>
+        </c:otherwise>
+    </c:choose>
 </nav>

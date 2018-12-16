@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import javax.sql.DataSource;
-import repository.Pair;
 
 
 public class PurchaseOrderRepository extends AbstractRepository {
@@ -53,9 +52,9 @@ public class PurchaseOrderRepository extends AbstractRepository {
     
     private final static String SQL_INSERT = ""
         + " INSERT INTO purchase_order "
-        + "     (customer_id, product_id, quantity, shipping_cost, sales_date, shipping_date, freight_company) "
+        + "     (order_num, customer_id, product_id, quantity, shipping_cost, sales_date, shipping_date, freight_company) "
         + " VALUES "
-        + "     (?, ?, ?, ?, ?, ?, ?)"
+        + "     ((SELECT MAX(order_num) +1 FROM purchase_order), ?, ?, ?, ?, ?, ?, ?)"
     ;
     
     private final static String SQL_UPDATE = ""
@@ -214,7 +213,7 @@ public class PurchaseOrderRepository extends AbstractRepository {
         else {
             parameters = Arrays.asList(
                 new QueryParameter("order_num", purchaseOrder.getNum())
-            ); 
+            );
             
             sql = this.buildQueryWith(SQL_UPDATE, parameters);
         }
@@ -266,7 +265,7 @@ public class PurchaseOrderRepository extends AbstractRepository {
         }
     }
 
-    // Specials
+    // Specials API
     public List<Pair<Float, ProductCode>> findAllGroupByProductCode(Date dateStart, Date dateEnd) throws RepositoryException {
         
         List<Pair<Float, ProductCode>> productCodeList = new LinkedList<>();

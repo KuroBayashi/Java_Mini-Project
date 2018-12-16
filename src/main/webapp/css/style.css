@@ -46,6 +46,9 @@ input[type="number"] {
 .link--nocolor {
     color: inherit;
 }
+.link--no-decoration:hover {
+    text-decoration: none;
+}
 
 
 /*

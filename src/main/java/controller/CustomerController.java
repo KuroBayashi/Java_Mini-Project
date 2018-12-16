@@ -110,12 +110,12 @@ public class CustomerController extends HttpServlet {
             }
             
             // Default Home
-            session.setAttribute("microMarkets", microMarketRepository.findAll());
+            request.setAttribute("microMarkets", microMarketRepository.findAll());
             
             request.getRequestDispatcher("/WEB-INF/template/customer/home.jsp").forward(request, response);
         }
         catch (SQLException|AbstractException e) {
-            session.setAttribute("error", e.getMessage());
+            request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
     }

@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import javax.sql.DataSource;
@@ -37,9 +39,21 @@ public class ProductRepository extends AbstractRepository {
     
     private final static String SQL_INSERT = ""
         + " INSERT INTO product "
-        + "     (manufacturer_id, product_code, purchase_cost, quantity_on_hand, markup, available, description) "
+        + "     (product_id, manufacturer_id, product_code, purchase_cost, quantity_on_hand, markup, available, description) "
         + " VALUES "
-        + "     (?, ?, ?, ?, ?, ?, ?) "
+        + "     ((SELECT MAX(product_id) +1 FROM product), ?, ?, ?, ?, ?, ?, ?) "
+    ;
+    
+    private final static String SQL_UPDATE = ""
+        + " UPDATE product "
+        + " SET "
+        + "     manufacturer_id = ?, product_code = ?, purchase_cost = ?, quantity_on_hand = ?, "
+        + "     markup = ?, available = ?, description = ? "
+    ;
+    
+    private final static String SQL_DELETE = ""
+        + " UPDATE product "
+        + " SET available = 'FALSE' "
     ;
     
     // Constructor
@@ -115,6 +129,32 @@ public class ProductRepository extends AbstractRepository {
         return product;
     }
     
+    public List<Product> findAllWith(List<QueryParameter> parameters) throws RepositoryException {
+        
+        List<Product> products = new LinkedList<>();
+        
+        String sql = this.buildQueryWith(SQL_SELECT, parameters);
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            this.setQueryParameters(stmt, parameters);
+            
+            try (
+                ResultSet rs = stmt.executeQuery();
+            ) {
+                while (rs.next())
+                    products.add(this.getProduct(rs));
+            }
+            
+        } catch (SQLException e) {
+            throw new RepositoryException("ProductRepository:findAllWith - " + e.getMessage());
+        }
+
+        return products;
+    }
+    
     public List<Product> findAll() throws RepositoryException {
         
         List<Product> products = new LinkedList<>();
@@ -132,5 +172,68 @@ public class ProductRepository extends AbstractRepository {
         }
             
         return products;
+    }
+    
+    public void save(Product product) throws RepositoryException {
+        
+        String sql;
+        List<QueryParameter> parameters = new ArrayList<>();
+        
+        // Query type : Insert or Update
+        if (-1 == product.getId())
+            sql = SQL_INSERT;
+        else {
+            parameters = Arrays.asList(
+                new QueryParameter("product_id", product.getId())
+            );
+            
+            sql = this.buildQueryWith(SQL_UPDATE, parameters);
+        }
+        
+        // Run query
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            int i = 0;
+            
+            stmt.setInt(    ++i, product.getManufacturer().getId());
+            stmt.setString( ++i, product.getCode().getCode());
+            stmt.setFloat(  ++i, product.getPurchaseCost());
+            stmt.setInt(    ++i, product.getQuantity());
+            stmt.setFloat(  ++i, product.getMarkup());
+            stmt.setString( ++i, product.getAvailable().toString().toUpperCase());
+            stmt.setString( ++i, product.getDescription());
+            
+            this.setQueryParameters(stmt, parameters, ++i);
+
+            if (1 != stmt.executeUpdate())
+                throw new SQLException("Failed to save Product.");
+                    
+        } catch (SQLException e) {
+            throw new RepositoryException("ProductRepository:save - " + e.getMessage());
+        }
+    }
+    
+    public void delete(Product product) throws RepositoryException {
+        
+        List<QueryParameter> parameters = Arrays.asList(
+            new QueryParameter("product_id", product.getId())
+        );
+        
+        String sql = this.buildQueryWith(SQL_DELETE, parameters);
+        
+        try (
+            Connection connection = this.dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            this.setQueryParameters(stmt, parameters);
+
+            if (0 == stmt.executeUpdate())
+                throw new SQLException("Failed to delete Product.");
+                    
+        } catch (SQLException e) {
+            throw new RepositoryException("ProductRepository:delete - " + e.getMessage());
+        }
     }
 }

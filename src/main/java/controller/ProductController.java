@@ -1,7 +1,9 @@
 package controller;
 
 import entity.Customer;
+import entity.Manufacturer;
 import entity.Product;
+import entity.ProductCode;
 import exception.AbstractException;
 import exception.AccessDeniedException;
 import exception.RepositoryException;
@@ -14,9 +16,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import repository.DataSourceFactory;
+import repository.ManufacturerRepository;
+import repository.ProductCodeRepository;
 import repository.ProductRepository;
 import repository.QueryParameter;
+import repository.RepositoryFactory;
 import service.FlashBag;
 import service.ServiceContainer;
 
@@ -48,46 +52,159 @@ public class ProductController extends HttpServlet {
         Customer customer = (Customer)session.getAttribute("customer");
         
         // Admin
-        Boolean isAdmin = (Boolean)session.getAttribute("isAdmin");
+        Boolean isAdmin = (null != session.getAttribute("isAdmin")) ? (Boolean)session.getAttribute("isAdmin") : false;
         
         // Action
         String action = request.getParameter("_action");
         
         try {
-            if ((null == customer || -1 == customer.getId()) && true != isAdmin)
-                throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
-            
-            ProductRepository productRepository = new ProductRepository(DataSourceFactory.getDataSource());
+            ProductRepository productRepository = RepositoryFactory.getProductRepository();
+            ManufacturerRepository manufacturerRepository = RepositoryFactory.getManufacturerRepository();
+            ProductCodeRepository productCodeRepository = RepositoryFactory.getProductCodeRepository();
 
             if (null != action) {
+                if (null == customer && false == isAdmin)
+                    throw new AccessDeniedException("PurchaseOrderController: You must be logged to access to this page.");
+                
                 // Create
                 if ("create".equals(action)) {
-                    // Create product
+                    try {
+                        Product product = new Product();
+                        
+                        if (null != request.getParameter("submit")) {
+                            Manufacturer manufacturer = manufacturerRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("m.manufacturer_id", Integer.parseInt(request.getParameter("manufacturer_id")))
+                            ));
+
+                            ProductCode productCode = productCodeRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("pc.prod_code", request.getParameter("product_code"))
+                            ));
+
+                            product
+                                .setManufacturer(manufacturer)
+                                .setCode(productCode)
+                                .setPurchaseCost(Float.parseFloat(request.getParameter("purchase_cost")))
+                                .setQuantity(Integer.parseInt(request.getParameter("quantity")))
+                                .setMarkup(Float.parseFloat(request.getParameter("markup")))
+                                .setAvailable(true)
+                                .setDescription(request.getParameter("description"))
+                            ;
+                            
+                            if (null == manufacturer)
+                                flashBag.add("danger", "Unknown manufacturer.");
+                            else if (null == productCode)
+                                flashBag.add("danger", "Unknown product code.");
+                            else {
+                                productRepository.save(product);
+                                
+                                flashBag.add("success", "You product has been successfully created.");
+                                
+                                response.sendRedirect(request.getContextPath() + "/product");
+                                return;
+                            }
+                        }
+                        
+                        request.setAttribute("manufacturers", manufacturerRepository.findAll());
+                        request.setAttribute("productCodes", productCodeRepository.findAll());
+                        request.setAttribute("product", product);
+                        request.getRequestDispatcher("/WEB-INF/template/product/create.jsp").forward(request, response);
+                        return;
+                        
+                    } catch (NumberFormatException e) {
+                        flashBag.add("danger", "Manufacturer id must be an integer.");
+                        flashBag.add("danger", "Purchase cost must be a float.");
+                        flashBag.add("danger", "Quantity must be an integer.");
+                        flashBag.add("danger", "Markup must be a float.");
+                    } catch (RepositoryException e) {
+                        flashBag.add("danger", e.getMessage());
+                    }
                 }
                 
                 // Edit
                 else if ("edit".equals(action)) {
-                    if (null != request.getParameter("submit")) {
-                        // Traitement du formulaire
-                        // Redirection vers la page du produit
-                    }
+                    try {
+                        // Form has been submitted
+                        if (null != request.getParameter("submit")) {
+                            
+                            Product product = productRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("p.product_id", Integer.parseInt(request.getParameter("product_id")))
+                            ));
+                            
+                            Manufacturer manufacturer = manufacturerRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("m.manufacturer_id", Integer.parseInt(request.getParameter("manufacturer_id")))
+                            ));
+                            
+                            ProductCode productCode = productCodeRepository.findOneWith(Arrays.asList(
+                                new QueryParameter("pc.prod_code", request.getParameter("code"))
+                            ));
+                            
+                            product
+                                .setManufacturer(manufacturer)
+                                .setCode(productCode)
+                                .setQuantity(Integer.parseInt(request.getParameter("quantity")))
+                                .setPurchaseCost(Float.parseFloat(request.getParameter("purchase_cost")))
+                                .setMarkup(Float.parseFloat(request.getParameter("markup")))
+                            ;
+                            
+                            productRepository.save(product);
+                            flashBag.add("success", "The product has been successfully updated.");
+                        }
+
+                        request.setAttribute("manufacturers", manufacturerRepository.findAll());
+                        request.setAttribute("productCodes", productCodeRepository.findAll());
+                        request.setAttribute("products", productRepository.findAllWith(Arrays.asList(
+                            new QueryParameter("available", "TRUE")
+                        )));
+                        request.getRequestDispatcher("/WEB-INF/template/product/edit.jsp").forward(request, response);
+                        return;
                     
-                    // Affichage du formulaire
+                    } catch (NumberFormatException e) {
+                        flashBag.add("danger", "Product id must be an integer.");
+                    } catch (RepositoryException e) {
+                        flashBag.add("danger", e.getMessage());
+                    }
                 }
                 
                 // Edit
                 else if ("delete".equals(action)) {
-                    // Delete
+                    try {
+                        Product product = productRepository.findOneWith(Arrays.asList(
+                            new QueryParameter("product_id", Integer.parseInt(request.getParameter("product_id")))
+                        ));
+
+                        if (null == product)
+                            flashBag.add("danger", "Unknown product, can't delete it.");
+                        else {
+                            productRepository.delete(product);
+
+                            flashBag.add("success", "The product has been successfully deleted.");
+                        }
+                        
+                        request.setAttribute("manufacturers", manufacturerRepository.findAll());
+                        request.setAttribute("productCodes", productCodeRepository.findAll());
+                        request.setAttribute("products", productRepository.findAllWith(Arrays.asList(
+                            new QueryParameter("available", "TRUE")
+                        )));
+                        request.getRequestDispatcher("/WEB-INF/template/product/edit.jsp").forward(request, response);
+                        return;
+                        
+                    } catch (NumberFormatException e) {
+                        flashBag.add("danger", "Product id must be an integer.");
+                    } catch (RepositoryException e) {
+                        flashBag.add("danger", e.getMessage());
+                    }
                 }
             }
             
             // Default Home
-            session.setAttribute("products", productRepository.findAll());
+            request.setAttribute("products", productRepository.findAllWith(Arrays.asList(
+                new QueryParameter("available", "TRUE")
+            )));
             
             request.getRequestDispatcher("/WEB-INF/template/product/home.jsp").forward(request, response);
             
-        } catch (AbstractException e) {  
-            session.setAttribute("error", e.getMessage());
+        } catch (SQLException | AbstractException e) {  
+            request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/template/error.jsp").forward(request, response);
         }
 
