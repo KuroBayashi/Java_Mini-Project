@@ -38,7 +38,7 @@
             <%@ include file="/WEB-INF/template/auth/_logout.jsp" %>
         </c:when>
         <c:otherwise>
-            <a href="${ctx}" class="link link--no-decoration c-btn">Login</a>
+            <a href="${ctx}/" class="link link--no-decoration c-btn">Login</a>
         </c:otherwise>
     </c:choose>
 </nav>
