@@ -10,7 +10,7 @@
         <c:set var="home_path" value="${ctx}/customer" />
     </c:when>
     <c:otherwise>
-        <c:set var="home_path" value="${ctx}" />
+        <c:set var="home_path" value="${ctx}/" />
     </c:otherwise>
 </c:choose>
 
