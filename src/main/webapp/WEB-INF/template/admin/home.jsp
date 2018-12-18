@@ -29,10 +29,10 @@
             <fieldset>
                 <legend>Period</legend>
 
-                <label for="date_start"></label>
+                <label for="date_start">From</label>
                 <input type="date" name="date_start" id="date_start" class="js-date-start">
 
-                <label for="date_end"></label>
+                <label for="date_end">to</label>
                 <input type="date" name="date_end" id="date_end" class="js-date-end">
             </fieldset>
 
